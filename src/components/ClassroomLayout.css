@@ -1624,3 +1624,105 @@
     text-align: center;
   }
 }
+
+/* 모바일 반응형 디자인 */
+@media (max-width: 768px) {
+  .classroom-layout {
+    padding: 1rem;
+    margin: 0.5rem;
+    border-radius: 15px;
+  }
+  
+  .classroom-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  
+  .classroom-header h2 {
+    font-size: 1.3rem;
+    text-align: center;
+  }
+  
+  .classroom-controls {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .control-btn {
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+    min-width: 80px;
+  }
+  
+  .seats-grid {
+    gap: 0.5rem;
+    padding: 1rem;
+  }
+  
+  .seat {
+    width: 60px;
+    height: 50px;
+    font-size: 0.7rem;
+    border-radius: 8px;
+  }
+  
+  .seat .seat-number {
+    font-size: 0.6rem;
+  }
+  
+  .seat .student-name {
+    font-size: 0.65rem;
+  }
+  
+  /* 교탁 모바일 최적화 */
+  .teacher-desk {
+    width: 120px;
+    height: 30px;
+    font-size: 0.8rem;
+    border-radius: 6px;
+  }
+  
+  /* 좌석 배치 컨트롤 모바일 최적화 */
+  .seat-arrangement-controls {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+  }
+  
+  .arrangement-options {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  
+  .arrangement-option {
+    flex-direction: column;
+    text-align: center;
+    padding: 1rem;
+  }
+  
+  .option-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .random-arrangement-page {
+    padding: 1rem;
+  }
+  
+  .random-arrangement-header h2 {
+    font-size: 1.3rem;
+  }
+  
+  .random-arrangement-header p {
+    font-size: 0.9rem;
+  }
+  
+  .random-arrangement-btn {
+    padding: 1rem;
+    font-size: 0.9rem;
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+  }
+}

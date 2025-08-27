@@ -48,3 +48,30 @@
   padding: 2rem;
   background-color: var(--background-color, #f5f3ff);
 }
+
+/* 모바일 반응형 디자인 */
+@media (max-width: 768px) {
+  .app-header {
+    padding: 1.5rem 1rem;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+  }
+  
+  .app-header h1 {
+    font-size: 1.8rem;
+  }
+  
+  .app-header p {
+    font-size: 1rem;
+  }
+  
+  .app-header .copyright {
+    font-size: 0.8rem;
+    text-align: center;
+  }
+  
+  .app-main {
+    padding: 1rem;
+    gap: 1.5rem;
+  }
+}

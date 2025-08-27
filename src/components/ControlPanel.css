@@ -363,3 +363,147 @@
 .example-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; z-index: 2000; }
 .modal-content { background: white; padding: 2rem; border-radius: 8px; max-width: 80%; max-height: 80%; overflow: auto; position: relative; }
 .close-btn { position: absolute; top: 1rem; right: 1rem; font-size: 1.5rem; font-weight: bold; cursor: pointer; color: #888; }
+
+.or-divider {
+  text-align: center;
+  margin: 0.5rem 0 1.5rem 0;
+  padding: 0.8rem 0;
+  position: relative;
+}
+
+.or-divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--border-color);
+  z-index: 1;
+}
+
+.or-divider span {
+  background: var(--control-panel-bg);
+  padding: 0 1rem;
+  color: var(--label-color);
+  font-weight: 500;
+  position: relative;
+  z-index: 2;
+  font-size: 0.9rem;
+}
+
+/* 모바일 반응형 디자인 */
+@media (max-width: 768px) {
+  .control-panel {
+    padding: 1rem;
+    margin: 0.5rem;
+  }
+  
+  .panel-header h2 {
+    font-size: 1.5rem;
+  }
+  
+  .panel-header p {
+    font-size: 1rem;
+  }
+  
+  /* 모바일에서는 세로 배치 */
+  .horizontal-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .file-upload-section, 
+  .arrangement-section .form-group, 
+  .summary-card, 
+  .direct-input-section, 
+  .manual-student-entry-section {
+    height: auto;
+    padding: 1rem;
+  }
+  
+  .upload-header h4 {
+    font-size: 1.1rem;
+  }
+  
+  .upload-header p {
+    font-size: 0.9rem;
+  }
+  
+  .upload-btn {
+    padding: 0.8rem 1.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .radio-group.horizontal {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  
+  .radio-option {
+    width: 100%;
+  }
+  
+  .form-group {
+    margin-bottom: 1rem;
+  }
+  
+  .summary-card h4 {
+    font-size: 1.1rem;
+  }
+  
+  .summary-stats {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .stat-item {
+    justify-content: center;
+  }
+  
+  .generate-btn {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1rem;
+  }
+  
+  /* 직접 입력 섹션 모바일 최적화 */
+  .direct-input-section {
+    overflow-x: auto;
+  }
+  
+  .student-list {
+    min-width: 300px;
+  }
+  
+  .input-row {
+    gap: 0.5rem;
+  }
+  
+  .input-row input,
+  .input-row select {
+    min-width: 80px;
+    font-size: 0.9rem;
+  }
+  
+  .bulk-controls {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  
+  .bulk-gender-controls {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .or-divider {
+    margin: 0.3rem 0 1rem 0;
+    padding: 0.5rem 0;
+  }
+  
+  .or-divider span {
+    font-size: 0.85rem;
+    padding: 0 0.8rem;
+  }
+}

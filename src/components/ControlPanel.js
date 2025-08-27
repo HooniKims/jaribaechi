@@ -166,7 +166,7 @@ const ControlPanel = ({ settings, onSettingsChange, students }) => {
             <span className="close-btn" onClick={() => setShowExample(false)}>&times;</span>
             <h4>엑셀 작성 예시</h4>
             <p>첫 행에 컬럼명을 입력하고, 그 아래로 학생 정보를 입력해주세요. (학년, 반, 학번, 성명, 성별)</p>
-            <img src="/example.png" alt="Excel example" style={{ width: '100%', marginTop: '1rem' }} />
+            <img src="/jaribaechi/example.png" alt="Excel example" style={{ width: '100%', marginTop: '1rem' }} />
           </div>
         </div>
       )}
@@ -194,6 +194,10 @@ const ControlPanel = ({ settings, onSettingsChange, students }) => {
                 <button className="example-btn" onClick={() => setShowExample(true)}>예시 보기</button>
               </div>
               {uploadStatus && <div className={`upload-status ${uploadStatus.includes('✅') ? 'success' : 'error'}`}>{uploadStatus}</div>}
+            </div>
+            
+            <div className="or-divider">
+              <span>또는 아래에 직접 입력하셔도 됩니다</span>
             </div>
           </div>
         </div>
