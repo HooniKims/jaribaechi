@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/jaribaechi/static/css/main.92ac948d.css",
+    "main.js": "/jaribaechi/static/js/main.63eff0ca.js",
+    "index.html": "/jaribaechi/index.html",
+    "main.92ac948d.css.map": "/jaribaechi/static/css/main.92ac948d.css.map",
+    "main.63eff0ca.js.map": "/jaribaechi/static/js/main.63eff0ca.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.92ac948d.css",
+    "static/js/main.63eff0ca.js"
+  ]
+}

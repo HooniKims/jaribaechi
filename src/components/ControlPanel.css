@@ -1,0 +1,365 @@
+:root {
+  --control-panel-bg: #ffffff;
+  --section-bg: #f8fafc;
+  --border-color: #e2e8f0;
+  --label-color: #4a5568;
+  --input-border-color: #cbd5e0;
+  --input-focus-border-color: var(--primary-color, #667eea);
+  --btn-primary-bg: var(--primary-color, #5a67d8);
+  --danger-color: #e53e3e;
+}
+
+.control-panel {
+  background: var(--control-panel-bg);
+  padding: 2rem;
+  border-radius: 24px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  max-width: 1200px;
+}
+
+.panel-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.panel-header h2 {
+  font-size: 2rem;
+  color: #1a202c;
+  margin-bottom: 0.5rem;
+}
+
+.panel-header p {
+  font-size: 1.1rem;
+  color: #718096;
+}
+
+.horizontal-layout {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1.5fr;
+  gap: 2rem;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+}
+
+.file-upload-section, .arrangement-section .form-group, .summary-card, .direct-input-section, .manual-student-entry-section {
+  background: var(--section-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 1.5rem;
+  height: 100%;
+}
+
+.upload-header h4, .form-group > label, .summary-card h3, .direct-input-section h4, .manual-entry-header h4 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 1rem;
+}
+
+.upload-area {
+  border: 2px dashed var(--input-border-color);
+  border-radius: 12px;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  background: #fff;
+}
+
+.upload-btn {
+  background: var(--btn-primary-bg);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.upload-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.upload-info {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #718096;
+}
+
+.example-btn {
+  background: none; border: none; color: var(--primary-color, #5a67d8); 
+  text-decoration: underline; cursor: pointer; font-size: 0.9rem; margin-left: 0.5rem;
+}
+
+.upload-status { margin-top: 1rem; font-weight: 500; }
+.upload-status.success { color: #38a169; }
+.upload-status.error { color: #e53e3e; }
+
+.divider {
+  text-align: center;
+  margin: 2rem 0;
+  color: #cbd5e0;
+  font-weight: 500;
+}
+
+.divider span {
+  background: var(--control-panel-bg);
+  padding: 0 1rem;
+}
+
+.direct-input-section {
+  padding: 1.5rem;
+}
+
+.class-info-group {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.form-group.compact {
+  flex: 1;
+  min-width: 120px;
+}
+
+.form-group.compact label {
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--label-color);
+  margin-bottom: 0.5rem;
+}
+
+.form-group.compact input,
+.form-group.compact select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--input-border-color);
+  border-radius: 8px;
+  font-size: 1rem;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.form-group.compact input:focus,
+.form-group.compact select:focus {
+  outline: none;
+  border-color: var(--input-focus-border-color);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+.arrangement-section .form-group {
+  padding: 1.5rem;
+}
+
+.arrangement-section .form-group label {
+  margin-bottom: 1rem;
+  display: block;
+  text-align: center;
+}
+
+.radio-group.horizontal {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.radio-option {
+  flex: 1;
+}
+
+.radio-option .radio-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 0.5rem;
+  border-radius: 8px;
+  border: 2px solid var(--border-color);
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  height: 100%;
+}
+
+.radio-option input[type="radio"] { display: none; }
+
+.radio-option input[type="radio"]:checked + .radio-label {
+  border-color: var(--input-focus-border-color);
+  background: #f0f2ff;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+  transform: translateY(-2px);
+}
+
+.radio-label .radio-icon { font-size: 1.2rem; margin-bottom: 0.25rem; }
+
+.summary-card {
+  background: var(--section-bg);
+  color: #333;
+  padding: 1.5rem;
+  border: 1px solid var(--border-color);
+  box-shadow: none;
+}
+
+.summary-card h3 {
+  text-align: center;
+}
+
+.summary-content p { font-size: 0.9rem; color: #555; margin-bottom: 0.75rem; line-height: 1.5; }
+.summary-content p:last-child { margin-bottom: 0; }
+.summary-content strong { font-weight: 600; }
+
+.manual-student-entry-section {
+  margin-top: 2rem;
+  background: var(--section-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 1.5rem;
+}
+
+.manual-entry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.manual-entry-header h4 {
+  margin-bottom: 0;
+}
+
+.collapse-btn {
+  background: none;
+  border: 1px solid var(--input-border-color);
+  color: var(--label-color);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.collapse-btn:hover {
+  background: #fff;
+  border-color: var(--label-color);
+}
+
+.student-table {
+  width: 100%;
+}
+
+.student-table-header, .student-table-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.student-table-header {
+  background: #f1f5f9;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-weight: 600;
+  color: var(--label-color);
+  margin-bottom: 0.5rem;
+}
+
+.student-table-row {
+  padding: 0.5rem 0;
+}
+
+.student-table-row:not(:last-child) {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.table-cell {
+  padding: 0 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.student-table-header .table-cell {
+  justify-content: center;
+}
+
+.table-cell.id { flex: 1; }
+.table-cell.name { flex: 2; }
+.table-cell.gender { flex: 1; }
+.table-cell.action { flex: 0 0 40px; justify-content: center; }
+
+.table-cell input, .table-cell select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--input-border-color);
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+
+.table-cell input:focus, .table-cell select:focus {
+  outline: none;
+  border-color: var(--input-focus-border-color);
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+.add-row-btn {
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: #e9ecef;
+  border: 1px dashed #ced4da;
+  border-radius: 8px;
+  color: #495057;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.add-row-btn:hover {
+  background: #dee2e6;
+  border-color: #adb5bd;
+}
+
+.delete-row-btn {
+  background: none;
+  border: none;
+  color: var(--danger-color);
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0.25rem;
+  line-height: 1;
+  opacity: 0.5;
+  transition: all 0.2s ease;
+}
+
+.delete-row-btn:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.bulk-gender-controls {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.bulk-gender-controls button {
+  background: #fff;
+  border: 1px solid var(--input-border-color);
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.bulk-gender-controls button:hover {
+  background: var(--input-focus-border-color);
+  color: white;
+  border-color: var(--input-focus-border-color);
+}
+
+.example-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; z-index: 2000; }
+.modal-content { background: white; padding: 2rem; border-radius: 8px; max-width: 80%; max-height: 80%; overflow: auto; position: relative; }
+.close-btn { position: absolute; top: 1rem; right: 1rem; font-size: 1.5rem; font-weight: bold; cursor: pointer; color: #888; }

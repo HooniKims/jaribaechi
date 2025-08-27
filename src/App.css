@@ -1,0 +1,50 @@
+.App {
+  text-align: center;
+}
+
+.student-id {
+  font-size: 0.8em;
+  color: #666;
+}
+
+.student-name {
+  font-weight: bold;
+}
+
+.app-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem;
+  color: white;
+  text-align: center;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 2.5rem;
+}
+
+.app-header p {
+  margin: 0.5rem 0 0;
+  font-size: 1.2rem;
+  opacity: 0.9;
+}
+
+.app-header .copyright {
+  margin: 0.5rem 0 0;
+  font-size: 0.9rem;
+  opacity: 0.6;
+  text-align: right;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.app-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  padding: 2rem;
+  background-color: var(--background-color, #f5f3ff);
+}

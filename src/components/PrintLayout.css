@@ -1,0 +1,168 @@
+:root {
+  
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.print-layout-final { background: var(--background-color); padding: 2rem 1rem; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+
+.print-controls-wrapper { width: 100%; max-width: 210mm; margin: 0 auto 2rem auto; background: var(--paper-background); border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); padding: 1rem; }
+.print-controls { display: flex; justify-content: center; gap: 1rem; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem; }
+.display-options { display: flex; justify-content: center; gap: 0.5rem; }
+
+/* 모든 버튼의 기본 텍스트 색상을 어둡게 설정 */
+.back-btn, .print-btn, .save-btn, .option-btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #212529; /* 기본 텍스트 색상: 어둡게 */
+}
+
+.save-btn:disabled { background-color: #a0a0a0; cursor: not-allowed; }
+
+/* 특정 배경색을 가진 버튼의 텍스트 색상을 흰색으로 오버라이드 */
+.back-btn { background: #6c757d; color: white; }
+.back-btn:hover { background: #5a6268; transform: translateY(-2px); }
+
+.print-btn { background: #0b5ed7; color: white; } /* 기본 색상을 hover 색상으로 변경 */
+.print-btn:hover { background: var(--accent-color); transform: translateY(-2px); } /* hover 색상을 원래 기본 색상으로 변경 */
+
+.save-btn { background: #157347; color: white; } /* 기본 색상을 hover 색상으로 변경 */
+.save-btn:hover { background: var(--save-color); transform: translateY(-2px); } /* hover 색상을 원래 기본 색상으로 변경 */
+
+/* option-btn 기본 스타일 */
+.option-btn { border: 1px solid; }
+.option-btn:hover { background-color: #f8f9fa; border-color: #adb5bd; }
+
+/* 각 옵션 버튼별 색상 */
+.option-btn.name-id-option { background-color: #e3f2fd; border-color: #90caf9; color: #0d47a1; }
+.option-btn.name-id-option.active { background-color: #0d47a1; border-color: #0d47a1; color: white; font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+.option-btn.name-only-option { background-color: #e8f5e9; border-color: #a5d6a7; color: #1b5e20; }
+.option-btn.name-only-option.active { background-color: #1b5e20; border-color: #1b5e20; color: white; font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+.option-btn.id-only-option { background-color: #fff3e0; border-color: #ffcc80; color: #e65100; }
+.option-btn.id-only-option.active { background-color: #e65100; border-color: #e65100; color: white; font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+
+.a4-container-final { width: 210mm; height: 297mm; margin: 0 auto; background: var(--paper-background); padding: 15mm; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1); border-radius: 8px; display: flex; flex-direction: column; border: 1px solid #adb5bd; }
+
+.print-header-final { text-align: center; padding-bottom: 10mm; border-bottom: 1px solid var(--border-color); flex-shrink: 0; width: 100%; }
+.print-header-final h1 { font-size: 2rem; font-weight: 700; color: var(--primary-text); margin: 0 0 0.5rem 0; }
+.print-date-final { font-size: 0.9rem; color: var(--secondary-text); margin: 0; }
+
+.print-classroom-final { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 0; }
+
+.classroom-label-top, .classroom-label-bottom { text-align: center; font-size: 1rem; font-weight: 700; color: var(--secondary-text); padding: 0.5rem; background-color: #f1f3f5; border-radius: 6px; border: 1px solid var(--border-color); flex-shrink: 0; width: 100%; }
+
+.print-seating-area-final { margin: 20px 0; }
+
+.print-seat-grid-final { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; }
+
+.print-seat-row-final { display: flex; justify-content: center; align-items: center; gap: 10px; }
+
+.print-seat-final {
+  width: 90px; /* 고정 너비 */
+  height: 55px; /* 고정 높이 */
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.print-seat-final.hidden { visibility: hidden; }
+
+.print-seat-final.occupied { box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06); }
+
+/* Section-specific colors */
+.print-seat-final[data-section-index="0"] { background: linear-gradient(145deg, #e3f2fd, #bbdefb); border: 1px solid #90caf9; }
+.print-seat-final[data-section-index="0"] .student-name-final { color: #0d47a1; }
+.print-seat-final[data-section-index="0"] .student-id-final { color: #1565c0; }
+
+.print-seat-final[data-section-index="1"] { background: linear-gradient(145deg, #e0f2f1, #b2dfdb); border: 1px solid #80cbc4; }
+.print-seat-final[data-section-index="1"] .student-name-final { color: #004d40; }
+.print-seat-final[data-section-index="1"] .student-id-final { color: #00796b; }
+
+.print-seat-final[data-section-index="2"] { background: linear-gradient(145deg, #fff3e0, #ffe0b2); border: 1px solid #ffcc80; }
+.print-seat-final[data-section-index="2"] .student-name-final { color: #e65100; }
+.print-seat-final[data-section-index="2"] .student-id-final { color: #fb8c00; }
+
+.print-seat-final[data-section-index="3"] { background: linear-gradient(145deg, #f3e5f5, #e1bee7); border: 1px solid #ce93d8; }
+.print-seat-final[data-section-index="3"] .student-name-final { color: #4a148c; }
+.print-seat-final[data-section-index="3"] .student-id-final { color: #8e24aa; }
+
+.print-student-info-final { padding: 5px; text-align: center; line-height: 1.2; width: 100%; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; }
+
+.student-name-final { font-weight: 700; font-size: 16px; }
+.student-id-final { font-weight: 500; font-size: 12px; }
+
+/* 이름 길이 및 표시 유형에 따른 스타일 */
+.display-nameOnly .student-name-final { font-size: 20px; }
+.display-idOnly .student-id-final { font-size: 18px; }
+
+.display-nameOnly .student-name-final[style*="0.8em"] { font-size: 16px !important; } /* 4글자 이상 */
+
+.print-vertical-aisle-final { width: 20px; flex-shrink: 0; }
+
+/* Animations & Overlays */
+.countdown-overlay, .saving-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 1; visibility: visible; transition: opacity 0.3s, visibility 0.3s; }
+.countdown-overlay:not(.show) { opacity: 0; visibility: hidden; }
+.saving-overlay { z-index: 1001; }
+.saving-message { color: white; font-size: 2rem; font-weight: 600; padding: 2rem; background: rgba(0,0,0,0.5); border-radius: 1rem; }
+
+.countdown-number { font-size: 15rem; font-weight: 900; color: white; text-shadow: 0 0 20px rgba(255, 255, 255, 0.5); transform: scale(0.5); opacity: 0; animation: countdown-tick 1s infinite; }
+@keyframes countdown-tick { 0% { transform: scale(0.8); opacity: 0; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+
+.shuffling .print-seat-final.occupied { border-color: var(--accent-color); box-shadow: inset 0 0 5px rgba(13, 110, 253, 0.3), 0 0 10px rgba(13, 110, 253, 0.2); }
+
+/* Print Styles */
+@media print { 
+  .no-print { display: none !important; } 
+  @page { size: A4; margin: 0; } 
+  html, body { height: 100%; margin: 0; padding: 0; background: white; } 
+  .print-layout-final { padding: 0; } 
+  .a4-container-final { width: 100%; height: 100%; margin: 0; padding: 15mm !important; border-radius: 0 !important; border: none !important; box-shadow: none !important; } 
+  .print-header-final { border-bottom: none !important; }
+  .classroom-label-top, .classroom-label-bottom {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    border: 1px solid #dee2e6 !important;
+    background-color: #f8f9fa !important;
+  }
+}
+
+.page-content-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.flip-btn {
+  margin-left: 1rem;
+  background-color: #f8f9fa;
+  border-color: #dee2e6;
+  color: #495057;
+}
+
+.flip-btn:hover {
+  background-color: #e9ecef;
+}
+
