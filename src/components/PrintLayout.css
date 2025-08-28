@@ -61,6 +61,26 @@ code {
 
 .a4-container-final { width: 210mm; height: 297mm; margin: 0 auto; background: var(--paper-background); padding: 15mm; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1); border-radius: 8px; display: flex; flex-direction: column; border: 1px solid #adb5bd; }
 
+/* 가로(Landscape) 모드 */
+.a4-container-final.landscape { 
+  width: 297mm; 
+  height: 210mm; 
+}
+
+.a4-container-final.landscape .print-header-final h1 {
+  font-size: 2.5rem;
+}
+
+.a4-container-final.landscape .print-date-final {
+  font-size: 1.1rem;
+}
+
+.a4-container-final.landscape .classroom-label-top,
+.a4-container-final.landscape .classroom-label-bottom {
+  font-size: 1.2rem;
+  padding: 0.8rem;
+}
+
 .print-header-final { text-align: center; padding-bottom: 10mm; border-bottom: 1px solid var(--border-color); flex-shrink: 0; width: 100%; }
 .print-header-final h1 { font-size: 2rem; font-weight: 700; color: var(--primary-text); margin: 0 0 0.5rem 0; }
 .print-date-final { font-size: 0.9rem; color: var(--secondary-text); margin: 0; }
@@ -71,7 +91,38 @@ code {
 
 .print-seating-area-final { margin: 20px 0; }
 
-.print-seat-grid-final { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; }
+.print-seat-grid-final { 
+  display: flex; 
+  flex-direction: column; 
+  justify-content: center; 
+  align-items: center; 
+  gap: 10px; 
+  max-width: 100%;
+  max-height: 100%;
+  transform-origin: center;
+}
+
+/* 세로 모드일 때 - 최대 8열까지 고려해서 스케일 조정 */
+.a4-container-final:not(.landscape) .print-seat-grid-final {
+  --max-cols: 8;
+  --seat-width: 90px;
+  --seat-gap: 10px;
+  --max-grid-width: calc(var(--max-cols) * var(--seat-width) + (var(--max-cols) - 1) * var(--seat-gap));
+  --available-width: calc(210mm - 30mm); /* A4 너비에서 패딩 제외 */
+  --scale-factor: min(1, calc(var(--available-width) / var(--max-grid-width)));
+  transform: scale(var(--scale-factor));
+}
+
+/* 가로 모드일 때 - 더 넓은 공간 활용 */
+.a4-container-final.landscape .print-seat-grid-final {
+  --max-cols: 12;
+  --seat-width: 90px;
+  --seat-gap: 10px;
+  --max-grid-width: calc(var(--max-cols) * var(--seat-width) + (var(--max-cols) - 1) * var(--seat-gap));
+  --available-width: calc(297mm - 30mm); /* A4 가로 너비에서 패딩 제외 */
+  --scale-factor: min(1, calc(var(--available-width) / var(--max-grid-width)));
+  transform: scale(var(--scale-factor));
+}
 
 .print-seat-row-final { display: flex; justify-content: center; align-items: center; gap: 10px; }
 
@@ -139,6 +190,7 @@ code {
   html, body { height: 100%; margin: 0; padding: 0; background: white; } 
   .print-layout-final { padding: 0; } 
   .a4-container-final { width: 100%; height: 100%; margin: 0; padding: 15mm !important; border-radius: 0 !important; border: none !important; box-shadow: none !important; } 
+  .a4-container-final.landscape { @page { size: A4 landscape; } }
   .print-header-final { border-bottom: none !important; }
   .classroom-label-top, .classroom-label-bottom {
     -webkit-print-color-adjust: exact;
@@ -164,5 +216,22 @@ code {
 
 .flip-btn:hover {
   background-color: #e9ecef;
+}
+
+.landscape-btn {
+  margin-left: 0.5rem;
+  background-color: #f8f9fa;
+  border-color: #dee2e6;
+  color: #495057;
+}
+
+.landscape-btn:hover {
+  background-color: #e9ecef;
+}
+
+.landscape-btn.active {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  color: white;
 }
 

@@ -16,18 +16,97 @@ const ClassroomLayout = ({
   const [verticalAisles, setVerticalAisles] = useState(new Set());
   const [showTeacherNotes, setShowTeacherNotes] = useState(true);
 
-  useEffect(() => {
-    let rows, cols;
-    if (settings.seatArrangement === 'single') {
-      const studentCount = settings.studentCount || 24;
-      const maxStudentsPerCol = 6;
-      const minCols = 3;
-      cols = Math.max(minCols, Math.ceil(studentCount / maxStudentsPerCol));
-      rows = Math.min(maxStudentsPerCol, Math.ceil(studentCount / cols));
-    } else {
-      rows = 6;
-      cols = 6;
+  // 화면 크기에 따른 최적 그리드 크기 계산
+  const calculateOptimalGridSize = (studentCount, seatArrangement) => {
+    // 화면 크기 기준 계산
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    // 실제 사용 가능한 최대 너비 설정 (780px보다 작게)
+    const maxAvailableWidth = Math.min(780, viewportWidth * 0.9);
+    const availableHeight = viewportHeight * 0.65; // 65vh 사용
+    
+    // 좌석 크기와 간격을 고려한 최대 가능한 열과 행 계산
+    let seatSize = Math.max(35, Math.min(55, viewportWidth * 0.04)); // 35px ~ 55px, 4vw
+    let seatGap = Math.max(4, Math.min(8, viewportWidth * 0.008)); // 4px ~ 8px, 0.8vw
+    
+    // 좌석 크기를 동적으로 조정해서 maxAvailableWidth에 맞춤
+    const estimatedCols = Math.ceil(Math.sqrt(studentCount * 1.2));
+    let estimatedRowWidth = estimatedCols * (seatSize + seatGap) - seatGap; // 마지막 gap 제외
+    
+    // 만약 추정 너비가 최대 너비를 초과하면 좌석 크기를 줄임
+    if (estimatedRowWidth > maxAvailableWidth) {
+      const availableWidthPerSeat = maxAvailableWidth / estimatedCols;
+      seatSize = Math.max(30, availableWidthPerSeat - seatGap); // 최소 30px 보장
+      seatGap = Math.max(2, Math.min(seatGap, (maxAvailableWidth - estimatedCols * seatSize) / (estimatedCols - 1)));
     }
+    
+    const maxCols = Math.floor((maxAvailableWidth + seatGap) / (seatSize + seatGap));
+    const maxRows = Math.floor(availableHeight / (seatSize + seatGap));
+    
+    let rows, cols;
+    
+    if (seatArrangement === 'single') {
+      // 단일 배치: 최대 너비를 넘지 않는 범위에서 최적 배치 계산
+      cols = Math.min(maxCols, Math.ceil(Math.sqrt(studentCount * 1.2)));
+      rows = Math.ceil(studentCount / cols);
+      
+      // 행이 너무 많으면 열을 늘려서 조정 (최대 너비 내에서)
+      while (rows > maxRows && cols < maxCols) {
+        cols++;
+        rows = Math.ceil(studentCount / cols);
+      }
+      
+      // 최종 검증: 실제 너비가 maxAvailableWidth를 넘지 않는지 확인
+      const actualRowWidth = cols * seatSize + (cols - 1) * seatGap;
+      if (actualRowWidth > maxAvailableWidth) {
+        cols = Math.floor((maxAvailableWidth + seatGap) / (seatSize + seatGap));
+        rows = Math.ceil(studentCount / cols);
+      }
+    } else {
+      // 쌍 배치: 최대 너비를 넘지 않는 범위에서 최적 배치 계산
+      const pairCount = Math.ceil(studentCount / 2);
+      cols = Math.min(maxCols, Math.ceil(Math.sqrt(pairCount * 1.5)));
+      cols = cols % 2 === 0 ? cols : Math.min(maxCols, cols + 1); // 쌍 배치를 위해 짝수로 조정
+      rows = Math.ceil(pairCount / (cols / 2));
+      
+      // 최종 검증
+      const actualRowWidth = cols * seatSize + (cols - 1) * seatGap;
+      if (actualRowWidth > maxAvailableWidth) {
+        cols = Math.floor((maxAvailableWidth + seatGap) / (seatSize + seatGap));
+        cols = cols % 2 === 0 ? cols : cols - 1; // 짝수로 맞춤
+        rows = Math.ceil(pairCount / (cols / 2));
+      }
+    }
+    
+    // 최소값 보장
+    rows = Math.max(2, Math.min(maxRows, rows));
+    cols = Math.max(3, Math.min(maxCols, cols));
+    
+    console.log(`계산된 그리드: ${cols}열 x ${rows}행, 예상 너비: ${cols * seatSize + (cols - 1) * seatGap}px (최대: ${maxAvailableWidth}px)`);
+    
+    return { rows, cols };
+  };
+
+  useEffect(() => {
+    // 기본 그리드 크기를 5행 6열로 설정
+    const defaultRows = 5;
+    const defaultCols = 6;
+    const studentCount = settings.studentCount || 0;
+    
+    let rows, cols;
+    
+    if (studentCount === 0) {
+      // 학생이 없을 때는 기본 5행 6열 빈 공간 표시
+      rows = defaultRows;
+      cols = defaultCols;
+    } else {
+      // 학생이 있을 때는 기본 그리드를 기준으로 배치하되, 필요시 확장
+      const { rows: calculatedRows, cols: calculatedCols } = calculateOptimalGridSize(studentCount, settings.seatArrangement);
+      rows = Math.max(defaultRows, calculatedRows);
+      cols = Math.max(defaultCols, calculatedCols);
+    }
+    
     setGridSize({ rows, cols });
 
     const newAisles = new Set();
@@ -49,6 +128,20 @@ const ClassroomLayout = ({
     setSeatGrid(newGrid);
     autoArrangeSeats(newGrid);
   }, [settings.studentCount, settings.seatArrangement, settings.pairingType, settings.maleCount, settings.femaleCount]);
+
+  // 화면 크기 변경 감지
+  useEffect(() => {
+    const handleResize = () => {
+      const studentCount = settings.studentCount || 24;
+      const { rows, cols } = calculateOptimalGridSize(studentCount, settings.seatArrangement);
+      if (rows !== gridSize.rows || cols !== gridSize.cols) {
+        setGridSize({ rows, cols });
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [settings.studentCount, settings.seatArrangement, gridSize]);
 
   const autoArrangeSeats = (initialGrid = null) => {
     const { studentCount, maleCount, femaleCount, seatArrangement } = settings;

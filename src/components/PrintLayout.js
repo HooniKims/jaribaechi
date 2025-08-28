@@ -32,6 +32,35 @@ const PrintLayout = ({ settings, seatData, onBack }) => {
   const [currentGrid, setCurrentGrid] = useState(null);
   const [displayType, setDisplayType] = useState('nameAndId'); // 'nameAndId', 'nameOnly', 'idOnly'
   const [isFlipped, setIsFlipped] = useState(false);
+  const [isLandscape, setIsLandscape] = useState(false);
+  
+  // 스케일 계산을 위한 useEffect
+  useEffect(() => {
+    if (!currentGrid || !printAreaRef.current) return;
+    
+    const calculateScale = () => {
+      const maxCols = Math.max(...currentGrid.map(row => row.length));
+      const seatWidth = 90; // CSS의 print-seat-final 너비
+      const seatGap = 10; // CSS의 gap
+      const gridWidth = maxCols * seatWidth + (maxCols - 1) * seatGap;
+      
+      // A4 사이즈에서 패딩을 제외한 사용 가능한 너비 (px 단위로 변환)
+      const availableWidth = isLandscape 
+        ? (297 - 30) * 3.7795275591 // 가로 모드: 297mm - 30mm padding
+        : (210 - 30) * 3.7795275591; // 세로 모드: 210mm - 30mm padding
+      
+      const scale = Math.min(1, availableWidth / gridWidth);
+      
+      const gridElement = printAreaRef.current.querySelector('.print-seat-grid-final');
+      if (gridElement) {
+        gridElement.style.transform = `scale(${scale})`;
+      }
+    };
+    
+    // DOM이 업데이트된 후 계산
+    const timeoutId = setTimeout(calculateScale, 100);
+    return () => clearTimeout(timeoutId);
+  }, [currentGrid, isLandscape]);
 
   const printAreaRef = useRef(null);
   const animationFrameRef = useRef(null);
@@ -241,10 +270,11 @@ const PrintLayout = ({ settings, seatData, onBack }) => {
             <button className={`option-btn name-only-option ${displayType === 'nameOnly' ? 'active' : ''}`} onClick={() => setDisplayType('nameOnly')}>이름만</button>
             <button className={`option-btn id-only-option ${displayType === 'idOnly' ? 'active' : ''}`} onClick={() => setDisplayType('idOnly')}>학번만</button>
             <button className="option-btn flip-btn" onClick={() => setIsFlipped(!isFlipped)}>🔄 상하 변경</button>
+            <button className={`option-btn landscape-btn ${isLandscape ? 'active' : ''}`} onClick={() => setIsLandscape(!isLandscape)}>📄 가로/세로 보기</button>
         </div>
       </div>
 
-      <div className="a4-container-final" ref={printAreaRef}>
+      <div className={`a4-container-final ${isLandscape ? 'landscape' : ''}`} ref={printAreaRef}>
         <div className="page-content-wrapper">
           <header className="print-header-final">
             <h1>{settings.grade}학년 {settings.classNumber}반 자리배치표</h1>

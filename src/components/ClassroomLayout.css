@@ -6,8 +6,9 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   width: 100%;
-  max-width: 1000px;
+  max-width: min(1000px, 95vw);
   margin: 0 auto;
+  overflow: hidden;
 }
 
 .classroom-header {
@@ -261,20 +262,62 @@
 .seat-grid {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: min(8px, 0.8vh);
   position: relative;
+  max-height: 70vh;
+  max-width: min(780px, 95vw);
+  width: fit-content;
+  overflow: auto;
+  padding: 1rem;
+  background: #f7fafc;
+  border-radius: 12px;
+  border: 2px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  margin: 0 auto;
+  /* 부드러운 스크롤바 */
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e0 #f7fafc;
+}
+
+/* 웹킷 브라우저용 스크롤바 스타일링 */
+.seat-grid::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.seat-grid::-webkit-scrollbar-track {
+  background: #f7fafc;
+  border-radius: 4px;
+}
+
+.seat-grid::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 4px;
+}
+
+.seat-grid::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
 }
 
 .seat-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: min(8px, 0.8vw);
+  justify-content: center;
+  max-width: min(780px, 100%);
+  width: fit-content;
+  overflow: hidden;
+  margin: 0 auto;
 }
 
 .seat {
-  width: 60px;
-  height: 60px;
-  border-radius: 10px;
+  width: min(55px, 4vw);
+  height: min(55px, 4vw);
+  min-width: 35px;
+  min-height: 35px;
+  max-width: 55px;
+  max-height: 55px;
+  border-radius: 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
