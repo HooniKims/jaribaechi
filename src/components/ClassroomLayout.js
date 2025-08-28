@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './ClassroomLayout.css';
 
 const ClassroomLayout = ({ 
@@ -143,7 +143,7 @@ const ClassroomLayout = ({
     return () => window.removeEventListener('resize', handleResize);
   }, [settings.studentCount, settings.seatArrangement, gridSize]);
 
-  const autoArrangeSeats = (initialGrid = null) => {
+  const autoArrangeSeats = useCallback((initialGrid = null) => {
     const { studentCount, maleCount, femaleCount, seatArrangement } = settings;
     const gridToUse = initialGrid || seatGrid;
     if (!gridToUse || gridToUse.length === 0) return;
@@ -246,7 +246,7 @@ const ClassroomLayout = ({
       }
     }
     setSeatGrid(newGrid);
-  };
+  }, [settings, seatGrid, verticalAisles]);
 
   const handleRandomArrangement = () => {
     if (!onRandomArrangement) return;
