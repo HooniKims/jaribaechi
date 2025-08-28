@@ -54,6 +54,20 @@ const ControlPanel = ({ settings, onSettingsChange, students }) => {
     handleStudentDataChange(updatedStudents);
   };
 
+  const handleClearAllStudents = () => {
+    if (window.confirm('모든 학생 정보를 삭제하시겠습니까?')) {
+      setManualStudents([]);
+      handleStudentDataChange([]);
+      // 학생 수도 초기화
+      onSettingsChange({
+        studentCount: '',
+        maleCount: '',
+        femaleCount: '',
+        students: []
+      });
+    }
+  };
+
   const handleRowKeyDown = (e, index) => {
     if (e.key === 'Tab' && !e.shiftKey && index === manualStudents.length - 1) {
       e.preventDefault();
@@ -337,9 +351,14 @@ const ControlPanel = ({ settings, onSettingsChange, students }) => {
       <div className="manual-student-entry-section">
         <div className="manual-entry-header">
           <h4>✍️ 학생 명단 직접 입력</h4>
-          <button onClick={() => setIsStudentTableCollapsed(!isStudentTableCollapsed)} className="collapse-btn">
-            {isStudentTableCollapsed ? '펴기' : '접기'}
-          </button>
+          <div className="manual-entry-controls">
+            <button onClick={handleClearAllStudents} className="clear-all-btn" title="모든 학생 정보 삭제">
+              🗑️ 전체 삭제
+            </button>
+            <button onClick={() => setIsStudentTableCollapsed(!isStudentTableCollapsed)} className="collapse-btn">
+              {isStudentTableCollapsed ? '펴기' : '접기'}
+            </button>
+          </div>
         </div>
         {!isStudentTableCollapsed && (
           <div className="student-table">

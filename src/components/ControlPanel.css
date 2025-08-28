@@ -231,6 +231,33 @@
   margin-bottom: 0;
 }
 
+.manual-entry-controls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.clear-all-btn {
+  background: var(--danger-color);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.clear-all-btn:hover {
+  background: #c53030;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(229, 62, 62, 0.3);
+}
+
 .collapse-btn {
   background: none;
   border: 1px solid var(--input-border-color);
