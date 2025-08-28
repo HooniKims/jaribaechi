@@ -127,7 +127,7 @@ const ClassroomLayout = ({
     }
     setSeatGrid(newGrid);
     autoArrangeSeats(newGrid);
-  }, [settings.studentCount, settings.seatArrangement, settings.pairingType, settings.maleCount, settings.femaleCount]);
+  }, [settings.studentCount, settings.seatArrangement, settings.pairingType, settings.maleCount, settings.femaleCount, autoArrangeSeats]);
 
   // 화면 크기 변경 감지
   useEffect(() => {
@@ -265,7 +265,7 @@ const ClassroomLayout = ({
       return;
     }
 
-    const { pairingType } = settings;
+    // const { pairingType } = settings; // 사용하지 않는 변수 제거
     const { togetherStudents, separateStudents, considerationStudents } = teacherNotes;
 
     let studentPool = students.length > 0 ? [...students] : [];
@@ -290,10 +290,10 @@ const ClassroomLayout = ({
       return false;
     };
 
-    // 옆자리 (짝) 확인 함수 - 통로를 넘지 않는 바로 옆자리만
-    const isAdjacent = (r1, c1, r2, c2) => {
-      return r1 === r2 && Math.abs(c1 - c2) === 1 && !hasAisleBetween(c1, c2);
-    };
+    // 옆자리 (짝) 확인 함수 - 통로를 넘지 않는 바로 옆자리만 (사용하지 않음)
+    // const isAdjacent = (r1, c1, r2, c2) => {
+    //   return r1 === r2 && Math.abs(c1 - c2) === 1 && !hasAisleBetween(c1, c2);
+    // };
 
     const isSeparated = (s1Name, s2Name) => separateStudents.some(p => new Set(p.students).has(s1Name) && new Set(p.students).has(s2Name));
 
