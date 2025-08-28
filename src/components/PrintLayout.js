@@ -259,7 +259,7 @@ const PrintLayout = ({ settings, seatData, onBack }) => {
                            style={infoStyle}
                       >
                         {displayType !== 'idOnly' && <div className={nameClasses.join(' ')} style={nameStyle}>{displayName}</div>}
-                        {displayType !== 'nameOnly' && <div className="student-id-final">{seat.studentId}</div>}
+                        {displayType !== 'nameOnly' && <div className="student-id-final">{seat.studentId || seat.studentNumber || seat.number}</div>}
                       </div>
                     )}
                   </div>

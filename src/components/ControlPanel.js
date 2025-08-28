@@ -75,6 +75,39 @@ const ControlPanel = ({ settings, onSettingsChange, students }) => {
 
     setManualStudents(updatedStudents);
     handleStudentDataChange(updatedStudents);
+    
+    // 학생 수가 변경되면 남녀 반반으로 기본 설정
+    const maleCount = Math.ceil(newCount / 2);
+    const femaleCount = newCount - maleCount;
+    onSettingsChange({
+      studentCount: newCount,
+      maleCount,
+      femaleCount
+    });
+  };
+
+  const handleGenderCountChange = (type, value) => {
+    // 빈 문자열일 때는 0으로 처리하되, 입력 중일 때는 그대로 유지
+    const newValue = value === '' ? 0 : parseInt(value);
+    const totalCount = settings.studentCount;
+    
+    if (isNaN(newValue)) return; // 숫자가 아닌 경우 무시
+    
+    if (type === 'male') {
+      const newMaleCount = Math.min(Math.max(0, newValue), totalCount);
+      const newFemaleCount = totalCount - newMaleCount;
+      onSettingsChange({
+        maleCount: newMaleCount,
+        femaleCount: newFemaleCount
+      });
+    } else {
+      const newFemaleCount = Math.min(Math.max(0, newValue), totalCount);
+      const newMaleCount = totalCount - newFemaleCount;
+      onSettingsChange({
+        maleCount: newMaleCount,
+        femaleCount: newFemaleCount
+      });
+    }
   };
 
   const handleFileUpload = (event) => {
@@ -253,15 +286,39 @@ const ControlPanel = ({ settings, onSettingsChange, students }) => {
             </div>
             <div className="form-group compact">
               <label htmlFor="studentCount">학생 수</label>
-              <input type="number" id="studentCount" min="1" max="50" value={settings.studentCount} onChange={(e) => handleStudentCountChange(parseInt(e.target.value) || 1)} />
+              <input 
+                type="number" 
+                id="studentCount" 
+                min="1" 
+                max="50" 
+                value={settings.studentCount || ''} 
+                onChange={(e) => handleStudentCountChange(parseInt(e.target.value) || 1)} 
+                placeholder="1"
+              />
             </div>
             <div className="form-group compact">
               <label htmlFor="maleCount">남학생</label>
-              <input type="number" id="maleCount" min="0" max={settings.studentCount} value={settings.maleCount} readOnly />
+              <input 
+                type="number" 
+                id="maleCount" 
+                min="0" 
+                max={settings.studentCount} 
+                value={settings.maleCount || ''} 
+                onChange={(e) => handleGenderCountChange('male', e.target.value)} 
+                placeholder="0"
+              />
             </div>
             <div className="form-group compact">
               <label htmlFor="femaleCount">여학생</label>
-              <input type="number" id="femaleCount" min="0" max={settings.studentCount} value={settings.femaleCount} readOnly />
+              <input 
+                type="number" 
+                id="femaleCount" 
+                min="0" 
+                max={settings.studentCount} 
+                value={settings.femaleCount || ''} 
+                onChange={(e) => handleGenderCountChange('female', e.target.value)} 
+                placeholder="0"
+              />
             </div>
         </div>
       </div>

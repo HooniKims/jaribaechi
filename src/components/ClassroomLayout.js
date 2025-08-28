@@ -296,11 +296,17 @@ const ClassroomLayout = ({
     //   return r1 === r2 && Math.abs(c1 - c2) === 1 && !hasAisleBetween(c1, c2);
     // };
 
-    const isSeparated = (s1Name, s2Name) => separateStudents.some(p => new Set(p.students).has(s1Name) && new Set(p.students).has(s2Name));
+    // 분리 확인 함수 - 이름 또는 학번으로 비교
+    const isSeparated = (identifier1, identifier2) => {
+      return separateStudents.some(p => {
+        const students = p.students;
+        return students.includes(identifier1) && students.includes(identifier2);
+      });
+    };
 
     // 떨어뜨릴 학생 검사 - 상하좌우 모든 방향
-    const checkNeighborSeparation = (studentName, r, c) => {
-        const constraints = separateStudents.filter(p => p.students.includes(studentName));
+    const checkNeighborSeparation = (studentIdentifier, r, c) => {
+        const constraints = separateStudents.filter(p => p.students.includes(studentIdentifier));
         if (constraints.length === 0) return true;
         
         // 상하좌우 8방향 검사
@@ -309,22 +315,38 @@ const ClassroomLayout = ({
                 if (dr === 0 && dc === 0) continue;
                 const nr = r + dr, nc = c + dc;
                 if (finalGrid[nr] && finalGrid[nr][nc] && finalGrid[nr][nc].studentName) {
-                    if (isSeparated(studentName, finalGrid[nr][nc].studentName)) return false;
+                    const neighborIdentifier = finalGrid[nr][nc].studentName || finalGrid[nr][nc].studentId;
+                    if (isSeparated(studentIdentifier, neighborIdentifier)) return false;
                 }
             }
         }
         return true;
     };
 
+    // 학생 검색 함수 - 이름 또는 학번으로 검색
+    const findStudentByNameOrNumber = (searchValue) => {
+      return studentPool.find(s => {
+        // 이름이 있으면 이름으로 검색
+        if (s.name && s.name.trim() !== '' && s.name === searchValue) {
+          return true;
+        }
+        // 이름이 없거나 비어있으면 학번으로 검색
+        if ((!s.name || s.name.trim() === '') && s.number === searchValue) {
+          return true;
+        }
+        return false;
+      });
+    };
+
     const placeStudent = (student, seat) => {
         finalGrid[seat.r][seat.c] = { ...seat, occupied: true, studentName: student.name, studentId: student.number, studentType: student.gender };
-        studentPool = studentPool.filter(s => s.name !== student.name);
+        studentPool = studentPool.filter(s => s !== student); // 참조로 제거
         allAvailableSeats = allAvailableSeats.filter(s => s.r !== seat.r || s.c !== seat.c);
     };
 
     // 1. 먼저 '배려' 학생 배치 (최우선)
     considerationStudents.forEach(cs => {
-        const student = studentPool.find(s => s.name === cs.student);
+        const student = findStudentByNameOrNumber(cs.student);
         if (!student) return;
 
         let targetSeats = [];
@@ -368,8 +390,8 @@ const ClassroomLayout = ({
 
     // 2. '붙여앉기' 학생 배치 - 랜덤 위치에 짝으로 배치
     togetherStudents.forEach(pair => {
-        const s1 = studentPool.find(s => s.name === pair.students[0]);
-        const s2 = studentPool.find(s => s.name === pair.students[1]);
+        const s1 = findStudentByNameOrNumber(pair.students[0]);
+        const s2 = findStudentByNameOrNumber(pair.students[1]);
         if (!s1 || !s2) return;
 
         // 가능한 짝자리 찾기
@@ -399,10 +421,10 @@ const ClassroomLayout = ({
 
     // 3. 나머지 학생 무작위 배치
     [...studentPool].forEach(student => {
-        if (!studentPool.some(s => s.name === student.name)) return;
+        if (!studentPool.includes(student)) return;
         const shuffledSeats = [...allAvailableSeats].sort(() => Math.random() - 0.5);
         for (const seat of shuffledSeats) {
-            if (checkNeighborSeparation(student.name, seat.r, seat.c)) {
+            if (checkNeighborSeparation(student.name || student.number, seat.r, seat.c)) {
                 placeStudent(student, seat);
                 break;
             }
