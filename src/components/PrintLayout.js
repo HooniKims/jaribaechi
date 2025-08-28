@@ -128,7 +128,28 @@ const PrintLayout = ({ settings, seatData, onBack }) => {
     };
   }, [seatData]);
 
-  const handlePrint = () => { window.print(); };
+  const handlePrint = () => {
+    // 가로 모드일 때 인쇄 스타일 동적 추가
+    if (isLandscape) {
+      const style = document.createElement('style');
+      style.textContent = `
+        @media print {
+          @page {
+            size: A4 landscape;
+            margin: 0;
+          }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      // 인쇄 후 스타일 제거
+      setTimeout(() => {
+        document.head.removeChild(style);
+      }, 1000);
+    }
+    
+    window.print();
+  };
 
   const handleSaveAsImage = useCallback(() => {
     const container = printAreaRef.current;
@@ -145,12 +166,15 @@ const PrintLayout = ({ settings, seatData, onBack }) => {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     const dateString = `${year}${month}${day}`;
-    const filename = `${settings.grade}학년 ${settings.classNumber}반 자리배치표(${dateString}).png`;
+    const orientation = isLandscape ? '가로' : '세로';
+    const filename = `${settings.grade}학년 ${settings.classNumber}반 자리배치표(${dateString}_${orientation}).png`;
 
     // A4 비율에 맞게 여백을 추가한 크기 계산
     const mmToPx = (mm) => (mm / 25.4) * 96; // 96 DPI 기준
-    const A4_WIDTH_PX = Math.round(mmToPx(210)); // 794px
-    const A4_HEIGHT_PX = Math.round(mmToPx(297)); // 1123px
+    
+    // 가로/세로 모드에 따른 A4 크기 설정
+    const A4_WIDTH_PX = isLandscape ? Math.round(mmToPx(297)) : Math.round(mmToPx(210)); // 가로: 1123px, 세로: 794px
+    const A4_HEIGHT_PX = isLandscape ? Math.round(mmToPx(210)) : Math.round(mmToPx(297)); // 가로: 794px, 세로: 1123px
     const MARGIN_PX = Math.round(mmToPx(20)); // 20mm 여백
 
     // page-content-wrapper를 A4 크기에 맞게 캡처
@@ -182,7 +206,7 @@ const PrintLayout = ({ settings, seatData, onBack }) => {
       .finally(() => {
         setIsSaving(false);
       });
-  }, [printAreaRef, settings.grade, settings.classNumber]);
+  }, [printAreaRef, settings.grade, settings.classNumber, isLandscape]);
 
   if (!currentGrid) {
     return (
