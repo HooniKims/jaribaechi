@@ -61,7 +61,21 @@ const ControlPanel = ({ settings, onSettingsChange, students }) => {
     }
   };
 
-  const handleStudentCountChange = (newCount) => {
+  const handleStudentCountChange = (value) => {
+    // 빈 문자열일 때는 그대로 유지 (최소값 강제 적용 안함)
+    if (value === '') {
+      onSettingsChange({ studentCount: '' });
+      return;
+    }
+    
+    const newCount = parseInt(value);
+    
+    if (isNaN(newCount) || newCount < 1) {
+      // 유효하지 않은 값이면 빈 문자열로 설정
+      onSettingsChange({ studentCount: '' });
+      return;
+    }
+    
     const currentCount = manualStudents.length;
     let updatedStudents = [...manualStudents];
 
@@ -289,11 +303,10 @@ const ControlPanel = ({ settings, onSettingsChange, students }) => {
               <input 
                 type="number" 
                 id="studentCount" 
-                min="1" 
                 max="50" 
                 value={settings.studentCount || ''} 
-                onChange={(e) => handleStudentCountChange(parseInt(e.target.value) || 1)} 
-                placeholder="1"
+                onChange={(e) => handleStudentCountChange(e.target.value)} 
+                placeholder="학생 수를 입력하세요"
               />
             </div>
             <div className="form-group compact">
@@ -301,11 +314,10 @@ const ControlPanel = ({ settings, onSettingsChange, students }) => {
               <input 
                 type="number" 
                 id="maleCount" 
-                min="0" 
                 max={settings.studentCount} 
                 value={settings.maleCount || ''} 
                 onChange={(e) => handleGenderCountChange('male', e.target.value)} 
-                placeholder="0"
+                placeholder="남학생 수"
               />
             </div>
             <div className="form-group compact">
@@ -313,11 +325,10 @@ const ControlPanel = ({ settings, onSettingsChange, students }) => {
               <input 
                 type="number" 
                 id="femaleCount" 
-                min="0" 
                 max={settings.studentCount} 
                 value={settings.femaleCount || ''} 
                 onChange={(e) => handleGenderCountChange('female', e.target.value)} 
-                placeholder="0"
+                placeholder="여학생 수"
               />
             </div>
         </div>
