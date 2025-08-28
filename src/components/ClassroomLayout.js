@@ -127,7 +127,8 @@ const ClassroomLayout = ({
     }
     setSeatGrid(newGrid);
     autoArrangeSeats(newGrid);
-  }, [settings.studentCount, settings.seatArrangement, settings.pairingType, settings.maleCount, settings.femaleCount, autoArrangeSeats]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [settings.studentCount, settings.seatArrangement, settings.pairingType, settings.maleCount, settings.femaleCount]);
 
   // 화면 크기 변경 감지
   useEffect(() => {
