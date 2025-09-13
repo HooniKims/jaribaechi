@@ -216,14 +216,32 @@ const ClassroomLayout = ({
 
       let s1_type = null, s2_type = null;
       if (settings.pairingType === 'mixed') {
-        if (malesToPlace > 0 && femalesToPlace > 0) { s1_type = 'male'; s2_type = 'female'; }
-        else if (malesToPlace >= 2) { s1_type = 'male'; s2_type = 'male'; }
-        else if (femalesToPlace >= 2) { s1_type = 'female'; s2_type = 'female'; }
+        // 남녀 짝: 우선 남녀 섞어서 앉히고, 같은 성별끼리도 배치
+        if (malesToPlace > 0 && femalesToPlace > 0) { 
+          s1_type = 'male'; s2_type = 'female'; 
+        }
+        else if (malesToPlace >= 2) { 
+          s1_type = 'male'; s2_type = 'male'; 
+        }
+        else if (femalesToPlace >= 2) { 
+          s1_type = 'female'; s2_type = 'female'; 
+        }
       } else if (settings.pairingType === 'samegender') {
-        if (malesToPlace >= 2) { s1_type = 'male'; s2_type = 'male'; }
-        else if (femalesToPlace >= 2) { s1_type = 'female'; s2_type = 'female'; }
-      } else if (settings.pairingType === 'male' && malesToPlace >= 2) { s1_type = 'male'; s2_type = 'male'; }
-      else if (settings.pairingType === 'female' && femalesToPlace >= 2) { s1_type = 'female'; s2_type = 'female'; }
+        // 성별 짝: 같은 성별끼리만 앉힘
+        if (malesToPlace >= 2) { 
+          s1_type = 'male'; s2_type = 'male'; 
+        }
+        else if (femalesToPlace >= 2) { 
+          s1_type = 'female'; s2_type = 'female'; 
+        }
+      } else if (settings.pairingType === 'male' && malesToPlace >= 2) { 
+        // 남학교: 남자만 있음
+        s1_type = 'male'; s2_type = 'male'; 
+      }
+      else if (settings.pairingType === 'female' && femalesToPlace >= 2) { 
+        // 여학교: 여자만 있음
+        s1_type = 'female'; s2_type = 'female'; 
+      }
 
       if (s1_type && s2_type) {
         newGrid[seat1.r][seat1.c] = { occupied: true, studentType: s1_type };
@@ -269,10 +287,40 @@ const ClassroomLayout = ({
     // const { pairingType } = settings; // 사용하지 않는 변수 제거
     const { togetherStudents, separateStudents, considerationStudents } = teacherNotes;
 
+    // 학생 풀 만들기: 기존 학생 데이터가 있으면 사용하고 없으면 새로 생성
     let studentPool = students.length > 0 ? [...students] : [];
     if (studentPool.length === 0) {
-      for (let i = 1; i <= settings.maleCount; i++) studentPool.push({ number: `M${i}`, name: `남학생${i}`, gender: 'male' });
-      for (let i = 1; i <= settings.femaleCount; i++) studentPool.push({ number: `F${i}`, name: `여학생${i}`, gender: 'female' });
+      // 학생 데이터가 없는 경우 설정된 인원수에 맞게 생성
+      for (let i = 1; i <= settings.maleCount; i++) {
+        studentPool.push({ 
+          number: `M${i}`, 
+          name: `남학생${i}`, 
+          gender: 'male' 
+        });
+      }
+      for (let i = 1; i <= settings.femaleCount; i++) {
+        studentPool.push({ 
+          number: `F${i}`, 
+          name: `여학생${i}`, 
+          gender: 'female' 
+        });
+      }
+    } else {
+      // 기존 학생 데이터가 있으면 gender 속성이 제대로 설정되어 있는지 확인
+      studentPool = studentPool.map(student => {
+        // 성별이 없는 경우, 학번 첫 글자로 성별 유추
+        if (!student.gender) {
+          if (student.number && student.number.startsWith('M')) {
+            return { ...student, gender: 'male' };
+          } else if (student.number && student.number.startsWith('F')) {
+            return { ...student, gender: 'female' };
+          } else {
+            // 판단할 수 없는 경우 기본값
+            return { ...student, gender: 'male' };
+          }
+        }
+        return student;
+      });
     }
 
     const finalGrid = seatGrid.map(row => row.map(seat => ({ ...seat, studentName: null, studentId: null, studentType: null })));
@@ -419,7 +467,101 @@ const ClassroomLayout = ({
         }
     });
 
-    // 3. 나머지 학생 무작위 배치
+    // 3. 짝 배치 및 나머지 학생 무작위 배치
+    if (settings.seatArrangement === 'pair' && settings.pairingType !== 'single') {
+        // 성별에 따라 학생 분류
+        const maleStudents = studentPool.filter(s => s.gender === 'male');
+        const femaleStudents = studentPool.filter(s => s.gender === 'female');
+        
+        // 남은 자리 중 짝으로 앉을 수 있는 자리 찾기
+        let possiblePairs = [];
+        for (let r = 0; r < gridSize.rows; r++) {
+            for (let c = 0; c < gridSize.cols - 1; c++) {
+                const seat1 = { r, c };
+                const seat2 = { r, c: c + 1 };
+                
+                const isSeat1Available = allAvailableSeats.some(s => s.r === seat1.r && s.c === seat1.c);
+                const isSeat2Available = allAvailableSeats.some(s => s.r === seat2.r && s.c === seat2.c);
+                
+                if (isSeat1Available && isSeat2Available && !hasAisleBetween(c, c + 1)) {
+                    possiblePairs.push([seat1, seat2]);
+                }
+            }
+        }
+        
+        // 가능한 모든 짝자리를 랜덤하게 섞기
+        const shuffledPairs = possiblePairs.sort(() => Math.random() - 0.5);
+        
+        // 짝 유형에 맞게 학생 배치
+        for (const pair of shuffledPairs) {
+            let student1 = null;
+            let student2 = null;
+            
+            if (settings.pairingType === 'mixed') {
+                // 남녀 짝
+                if (maleStudents.length > 0 && femaleStudents.length > 0) {
+                    student1 = maleStudents.pop();
+                    student2 = femaleStudents.pop();
+                } else if (maleStudents.length >= 2) {
+                    student1 = maleStudents.pop();
+                    student2 = maleStudents.pop();
+                } else if (femaleStudents.length >= 2) {
+                    student1 = femaleStudents.pop();
+                    student2 = femaleStudents.pop();
+                }
+            } else if (settings.pairingType === 'samegender') {
+                // 성별 짝
+                if (maleStudents.length >= 2) {
+                    student1 = maleStudents.pop();
+                    student2 = maleStudents.pop();
+                } else if (femaleStudents.length >= 2) {
+                    student1 = femaleStudents.pop();
+                    student2 = femaleStudents.pop();
+                }
+            } else if (settings.pairingType === 'male') {
+                // 남학교
+                if (maleStudents.length >= 2) {
+                    student1 = maleStudents.pop();
+                    student2 = maleStudents.pop();
+                }
+            } else if (settings.pairingType === 'female') {
+                // 여학교
+                if (femaleStudents.length >= 2) {
+                    student1 = femaleStudents.pop();
+                    student2 = femaleStudents.pop();
+                }
+            }
+            
+            if (student1 && student2) {
+                // 짝이 만들어지면 배치
+                const [seat1, seat2] = pair;
+                
+                // 분리 요청된 학생인지 확인
+                const identifier1 = student1.name || student1.number;
+                const identifier2 = student2.name || student2.number;
+                
+                // 두 학생이 분리 대상이 아니면 배치
+                if (!isSeparated(identifier1, identifier2) &&
+                    checkNeighborSeparation(identifier1, seat1.r, seat1.c) &&
+                    checkNeighborSeparation(identifier2, seat2.r, seat2.c)) {
+                    placeStudent(student1, seat1);
+                    placeStudent(student2, seat2);
+                } else {
+                    // 분리 대상이면 학생들을 다시 풀로 돌려놓기
+                    if (student1.gender === 'male') maleStudents.push(student1);
+                    else femaleStudents.push(student1);
+                    
+                    if (student2.gender === 'male') maleStudents.push(student2);
+                    else femaleStudents.push(student2);
+                }
+            }
+        }
+        
+        // 남은 학생들을 다시 풀에 합치기
+        studentPool = [...maleStudents, ...femaleStudents];
+    }
+    
+    // 남은 학생들 무작위 배치
     [...studentPool].forEach(student => {
         if (!studentPool.includes(student)) return;
         const shuffledSeats = [...allAvailableSeats].sort(() => Math.random() - 0.5);
