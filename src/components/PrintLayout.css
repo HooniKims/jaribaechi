@@ -59,12 +59,24 @@ code {
 .option-btn.id-only-option.active { background-color: #e65100; border-color: #e65100; color: white; font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 
 
-.a4-container-final { width: 210mm; height: 297mm; margin: 0 auto; background: var(--paper-background); padding: 15mm; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1); border-radius: 8px; display: flex; flex-direction: column; border: 1px solid #adb5bd; }
+.a4-container-final { 
+  width: 210mm; 
+  height: 297mm; 
+  margin: 0 auto; 
+  background: var(--paper-background); 
+  padding: 15mm 20mm; /* 좌우 여백 늘림 */
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1); 
+  border-radius: 8px; 
+  display: flex; 
+  flex-direction: column; 
+  border: 1px solid #adb5bd; 
+}
 
 /* 가로(Landscape) 모드 */
 .a4-container-final.landscape { 
   width: 297mm; 
   height: 210mm; 
+  padding: 15mm 25mm; /* 가로 모드에서는 좌우 여백을 더 넓게 */
 }
 
 .a4-container-final.landscape .print-header-final h1 {
@@ -96,7 +108,7 @@ code {
   flex-direction: column; 
   justify-content: center; 
   align-items: center; 
-  gap: 10px; 
+  gap: 8px; /* 행간 간격 약간 줄임 */
   max-width: 100%;
   max-height: 100%;
   transform-origin: center;
@@ -105,10 +117,10 @@ code {
 /* 세로 모드일 때 - 최대 8열까지 고려해서 스케일 조정 */
 .a4-container-final:not(.landscape) .print-seat-grid-final {
   --max-cols: 8;
-  --seat-width: 90px;
-  --seat-gap: 10px;
+  --seat-width: 85px; /* 좌석 너비 업데이트 */
+  --seat-gap: 8px; /* 간격 업데이트 */
   --max-grid-width: calc(var(--max-cols) * var(--seat-width) + (var(--max-cols) - 1) * var(--seat-gap));
-  --available-width: calc(210mm - 30mm); /* A4 너비에서 패딩 제외 */
+  --available-width: calc(210mm - 40mm); /* A4 너비에서 패딩 제외 - 좌우 여백 더 넓게 고려 */
   --scale-factor: min(1, calc(var(--available-width) / var(--max-grid-width)));
   transform: scale(var(--scale-factor));
 }
@@ -116,19 +128,19 @@ code {
 /* 가로 모드일 때 - 더 넓은 공간 활용 */
 .a4-container-final.landscape .print-seat-grid-final {
   --max-cols: 12;
-  --seat-width: 90px;
-  --seat-gap: 10px;
+  --seat-width: 85px; /* 좌석 너비 업데이트 */
+  --seat-gap: 8px; /* 간격 업데이트 */
   --max-grid-width: calc(var(--max-cols) * var(--seat-width) + (var(--max-cols) - 1) * var(--seat-gap));
-  --available-width: calc(297mm - 30mm); /* A4 가로 너비에서 패딩 제외 */
+  --available-width: calc(297mm - 50mm); /* A4 가로 너비에서 패딩 제외 - 좌우 여백 더 넓게 고려 */
   --scale-factor: min(1, calc(var(--available-width) / var(--max-grid-width)));
   transform: scale(var(--scale-factor));
 }
 
-.print-seat-row-final { display: flex; justify-content: center; align-items: center; gap: 10px; }
+.print-seat-row-final { display: flex; justify-content: center; align-items: center; gap: 8px; /* 좌석 간 간격 줄임 */ }
 
 .print-seat-final {
-  width: 90px; /* 고정 너비 */
-  height: 55px; /* 고정 높이 */
+  width: 85px; /* 약간 줄인 고정 너비 */
+  height: 52px; /* 약간 줄인 고정 높이 */
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -158,6 +170,31 @@ code {
 .print-seat-final[data-section-index="3"] { background: linear-gradient(145deg, #f3e5f5, #e1bee7); border: 1px solid #ce93d8; }
 .print-seat-final[data-section-index="3"] .student-name-final { color: #4a148c; }
 .print-seat-final[data-section-index="3"] .student-id-final { color: #8e24aa; }
+
+/* 추가 분단 색상 - 4분단 이상의 자리배치를 위해 추가 */
+.print-seat-final[data-section-index="4"] { background: linear-gradient(145deg, #e8f5e9, #c8e6c9); border: 1px solid #a5d6a7; }
+.print-seat-final[data-section-index="4"] .student-name-final { color: #1b5e20; }
+.print-seat-final[data-section-index="4"] .student-id-final { color: #2e7d32; }
+
+.print-seat-final[data-section-index="5"] { background: linear-gradient(145deg, #f1f8e9, #dcedc8); border: 1px solid #c5e1a5; }
+.print-seat-final[data-section-index="5"] .student-name-final { color: #33691e; }
+.print-seat-final[data-section-index="5"] .student-id-final { color: #558b2f; }
+
+.print-seat-final[data-section-index="6"] { background: linear-gradient(145deg, #fffde7, #fff9c4); border: 1px solid #fff176; }
+.print-seat-final[data-section-index="6"] .student-name-final { color: #f57f17; }
+.print-seat-final[data-section-index="6"] .student-id-final { color: #fbc02d; }
+
+.print-seat-final[data-section-index="7"] { background: linear-gradient(145deg, #fce4ec, #f8bbd0); border: 1px solid #f48fb1; }
+.print-seat-final[data-section-index="7"] .student-name-final { color: #880e4f; }
+.print-seat-final[data-section-index="7"] .student-id-final { color: #c2185b; }
+
+/* 색상이 지정되지 않은 자리를 위한 기본 색상 */
+.print-seat-final { 
+  background: linear-gradient(145deg, #f5f5f5, #e0e0e0); 
+  border: 1px solid #bdbdbd; 
+}
+.print-seat-final .student-name-final { color: #212121; }
+.print-seat-final .student-id-final { color: #424242; }
 
 .print-student-info-final { padding: 5px; text-align: center; line-height: 1.2; width: 100%; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; }
 

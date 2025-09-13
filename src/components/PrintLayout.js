@@ -40,14 +40,14 @@ const PrintLayout = ({ settings, seatData, onBack }) => {
     
     const calculateScale = () => {
       const maxCols = Math.max(...currentGrid.map(row => row.length));
-      const seatWidth = 90; // CSS의 print-seat-final 너비
-      const seatGap = 10; // CSS의 gap
+      const seatWidth = 85; // CSS의 print-seat-final 너비 (업데이트됨)
+      const seatGap = 8; // CSS의 gap (업데이트됨)
       const gridWidth = maxCols * seatWidth + (maxCols - 1) * seatGap;
       
       // A4 사이즈에서 패딩을 제외한 사용 가능한 너비 (px 단위로 변환)
       const availableWidth = isLandscape 
-        ? (297 - 30) * 3.7795275591 // 가로 모드: 297mm - 30mm padding
-        : (210 - 30) * 3.7795275591; // 세로 모드: 210mm - 30mm padding
+        ? (297 - 50) * 3.7795275591 // 가로 모드: 297mm - 50mm padding (여백 더 넓게)
+        : (210 - 40) * 3.7795275591; // 세로 모드: 210mm - 40mm padding (여백 더 넓게)
       
       const scale = Math.min(1, availableWidth / gridWidth);
       
@@ -224,7 +224,9 @@ const PrintLayout = ({ settings, seatData, onBack }) => {
         {displayGrid.map((row, rowIndex) => (
           <div key={rowIndex} className="print-seat-row-final">
             {row.map((seat, colIndex) => {
-              const sectionIndex = getSectionIndex(colIndex, seatData.verticalAisles);
+              // 모든 열에 대해 적절한 색상 섹션 적용 (8개 섹션으로 제한)
+              let sectionIndex = getSectionIndex(colIndex, seatData.verticalAisles);
+              sectionIndex = sectionIndex % 8; // 0-7까지의 값으로 제한 (8개의 색상 섹션)
               
               const nameStyle = {};
               let displayName = seat.studentName;
