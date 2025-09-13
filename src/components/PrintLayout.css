@@ -108,39 +108,80 @@ code {
   flex-direction: column; 
   justify-content: center; 
   align-items: center; 
-  gap: 8px; /* 행간 간격 약간 줄임 */
+  gap: 10px; /* 원래의 행간 간격으로 복원 */
   max-width: 100%;
   max-height: 100%;
   transform-origin: center;
 }
 
-/* 세로 모드일 때 - 최대 8열까지 고려해서 스케일 조정 */
+/* 세로 모드에서 기본 스케일 (6열 이하) */
 .a4-container-final:not(.landscape) .print-seat-grid-final {
-  --max-cols: 8;
-  --seat-width: 85px; /* 좌석 너비 업데이트 */
-  --seat-gap: 8px; /* 간격 업데이트 */
+  --max-cols: 6;
+  --seat-width: 90px; /* 원래 크기 복원 */
+  --seat-gap: 10px; /* 원래 간격 복원 */
   --max-grid-width: calc(var(--max-cols) * var(--seat-width) + (var(--max-cols) - 1) * var(--seat-gap));
-  --available-width: calc(210mm - 40mm); /* A4 너비에서 패딩 제외 - 좌우 여백 더 넓게 고려 */
+  --available-width: calc(210mm - 40mm); /* A4 너비에서 패딩 제외 */
   --scale-factor: min(1, calc(var(--available-width) / var(--max-grid-width)));
   transform: scale(var(--scale-factor));
 }
 
-/* 가로 모드일 때 - 더 넓은 공간 활용 */
+/* 세로 모드에서 7열 이상일 때는 자동으로 크기 조정 */
+@media print, screen {
+  .a4-container-final:not(.landscape) .print-seat-grid-final:has(.print-seat-row-final:first-child > :nth-child(13)),
+  .a4-container-final:not(.landscape) .print-seat-grid-final:has(.print-seat-row-final:first-child > :nth-child(11)) {
+    --max-cols: 8;
+    --seat-width: 85px; /* 좌석 너비 감소 */
+    --seat-gap: 8px; /* 간격 감소 */
+    --max-grid-width: calc(var(--max-cols) * var(--seat-width) + (var(--max-cols) - 1) * var(--seat-gap));
+    --scale-factor: min(1, calc(var(--available-width) / var(--max-grid-width)));
+    transform: scale(var(--scale-factor));
+  }
+}
+
+/* 가로 모드에서 기본 스케일 (8열 이하) */
 .a4-container-final.landscape .print-seat-grid-final {
-  --max-cols: 12;
-  --seat-width: 85px; /* 좌석 너비 업데이트 */
-  --seat-gap: 8px; /* 간격 업데이트 */
+  --max-cols: 8;
+  --seat-width: 90px; /* 원래 크기 복원 */
+  --seat-gap: 10px; /* 원래 간격 복원 */
   --max-grid-width: calc(var(--max-cols) * var(--seat-width) + (var(--max-cols) - 1) * var(--seat-gap));
-  --available-width: calc(297mm - 50mm); /* A4 가로 너비에서 패딩 제외 - 좌우 여백 더 넓게 고려 */
+  --available-width: calc(297mm - 50mm); /* A4 가로 너비에서 패딩 제외 */
   --scale-factor: min(1, calc(var(--available-width) / var(--max-grid-width)));
   transform: scale(var(--scale-factor));
 }
 
-.print-seat-row-final { display: flex; justify-content: center; align-items: center; gap: 8px; /* 좌석 간 간격 줄임 */ }
+/* 가로 모드에서 9열 이상일 때는 자동으로 크기 조정 */
+@media print, screen {
+  .a4-container-final.landscape .print-seat-grid-final:has(.print-seat-row-final:first-child > :nth-child(17)),
+  .a4-container-final.landscape .print-seat-grid-final:has(.print-seat-row-final:first-child > :nth-child(15)) {
+    --max-cols: 12;
+    --seat-width: 85px; /* 좌석 너비 감소 */
+    --seat-gap: 8px; /* 간격 감소 */
+    --max-grid-width: calc(var(--max-cols) * var(--seat-width) + (var(--max-cols) - 1) * var(--seat-gap));
+    --scale-factor: min(1, calc(var(--available-width) / var(--max-grid-width)));
+    transform: scale(var(--scale-factor));
+  }
+}
+
+.print-seat-row-final { 
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  gap: 10px; /* 기본 간격은 크게 */
+}
+
+/* 7열 이상인 경우에 간격을 동적으로 조정 */
+@media print, screen {
+  .print-seat-grid-final:has(.print-seat-row-final:first-child > :nth-child(11)) .print-seat-row-final,
+  .print-seat-grid-final:has(.print-seat-row-final:first-child > :nth-child(13)) .print-seat-row-final,
+  .print-seat-grid-final:has(.print-seat-row-final:first-child > :nth-child(15)) .print-seat-row-final,
+  .print-seat-grid-final:has(.print-seat-row-final:first-child > :nth-child(17)) .print-seat-row-final {
+    gap: 8px; /* 많은 열이 있을 때는 간격 줄임 */
+  }
+}
 
 .print-seat-final {
-  width: 85px; /* 약간 줄인 고정 너비 */
-  height: 52px; /* 약간 줄인 고정 높이 */
+  width: 90px; /* 기본 크기는 크게 설정 */
+  height: 55px; /* 기본 크기는 크게 설정 */
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -148,6 +189,17 @@ code {
   transition: all 0.15s ease;
   position: relative;
   overflow: hidden;
+}
+
+/* 7열 이상인 경우에 좌석 크기를 동적으로 조정 */
+@media print, screen {
+  .print-seat-grid-final:has(.print-seat-row-final:first-child > :nth-child(11)) .print-seat-final,
+  .print-seat-grid-final:has(.print-seat-row-final:first-child > :nth-child(13)) .print-seat-final,
+  .print-seat-grid-final:has(.print-seat-row-final:first-child > :nth-child(15)) .print-seat-final,
+  .print-seat-grid-final:has(.print-seat-row-final:first-child > :nth-child(17)) .print-seat-final {
+    width: 85px; 
+    height: 52px;
+  }
 }
 
 .print-seat-final.hidden { visibility: hidden; }
