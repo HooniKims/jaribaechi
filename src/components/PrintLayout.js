@@ -92,11 +92,26 @@ const PrintLayout = ({ settings, seatData, onBack }) => {
 
     const animate = () => {
       const shuffledStudents = shuffleArray(studentList);
+      const shuffledMaleStudents = shuffledStudents.filter(student => student.gender === 'male');
+      const shuffledFemaleStudents = shuffledStudents.filter(student => student.gender === 'female');
       let studentIndex = 0;
+      let maleStudentIndex = 0;
+      let femaleStudentIndex = 0;
       const newGrid = seatData.grid.map(row =>
         row.map(seat => {
           if (seat.occupied) {
-            const randomStudent = shuffledStudents[studentIndex % shuffledStudents.length];
+            let randomStudent = null;
+
+            if (seat.studentType === 'male' && shuffledMaleStudents.length > 0) {
+              randomStudent = shuffledMaleStudents[maleStudentIndex % shuffledMaleStudents.length];
+              maleStudentIndex++;
+            } else if (seat.studentType === 'female' && shuffledFemaleStudents.length > 0) {
+              randomStudent = shuffledFemaleStudents[femaleStudentIndex % shuffledFemaleStudents.length];
+              femaleStudentIndex++;
+            } else {
+              randomStudent = shuffledStudents[studentIndex % shuffledStudents.length];
+            }
+
             studentIndex++;
             return { ...seat, studentName: randomStudent.name, studentId: randomStudent.number };
           }

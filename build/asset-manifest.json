@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/jaribaechi/static/css/main.8fbf8480.css",
-    "main.js": "/jaribaechi/static/js/main.65d8dc14.js",
+    "main.css": "/jaribaechi/static/css/main.66263db5.css",
+    "main.js": "/jaribaechi/static/js/main.05dc59be.js",
     "index.html": "/jaribaechi/index.html",
-    "main.8fbf8480.css.map": "/jaribaechi/static/css/main.8fbf8480.css.map",
-    "main.65d8dc14.js.map": "/jaribaechi/static/js/main.65d8dc14.js.map"
+    "main.66263db5.css.map": "/jaribaechi/static/css/main.66263db5.css.map",
+    "main.05dc59be.js.map": "/jaribaechi/static/js/main.05dc59be.js.map"
   },
   "entrypoints": [
-    "static/css/main.8fbf8480.css",
-    "static/js/main.65d8dc14.js"
+    "static/css/main.66263db5.css",
+    "static/js/main.05dc59be.js"
   ]
 }

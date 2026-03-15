@@ -1,44 +1,96 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './App.css';
 import ControlPanel from './components/ControlPanel';
 import ClassroomLayout from './components/ClassroomLayout';
 import PrintLayout from './components/PrintLayout';
 
+const APP_STORAGE_KEY = 'jaribaechi-app-state-v1';
+
+const DEFAULT_CLASS_SETTINGS = {
+  grade: 1,
+  classNumber: 1,
+  studentCount: 24,
+  maleCount: 12,
+  femaleCount: 12,
+  pairingType: 'mixed',
+  seatArrangement: 'pair'
+};
+
+const DEFAULT_TEACHER_NOTES = {
+  togetherStudents: [],
+  separateStudents: [],
+  considerationStudents: [],
+};
+
+const normalizeTeacherNotes = (teacherNotes = {}) => ({
+  togetherStudents: Array.isArray(teacherNotes.togetherStudents) ? teacherNotes.togetherStudents : [],
+  separateStudents: Array.isArray(teacherNotes.separateStudents) ? teacherNotes.separateStudents : [],
+  considerationStudents: Array.isArray(teacherNotes.considerationStudents) ? teacherNotes.considerationStudents : [],
+});
+
+const loadPersistedAppState = () => {
+  if (typeof window === 'undefined') return null;
+
+  try {
+    const rawState = window.localStorage.getItem(APP_STORAGE_KEY);
+    if (!rawState) return null;
+
+    const parsedState = JSON.parse(rawState);
+    return parsedState && typeof parsedState === 'object' ? parsedState : null;
+  } catch (error) {
+    console.error('저장된 앱 상태를 불러오지 못했습니다.', error);
+    return null;
+  }
+};
+
+const getInitialAppState = () => {
+  const persistedState = loadPersistedAppState();
+
+  return {
+    classSettings: { ...DEFAULT_CLASS_SETTINGS, ...(persistedState?.classSettings || {}) },
+    students: Array.isArray(persistedState?.students) ? persistedState.students : [],
+    currentPage: persistedState?.currentPage === 'print' ? 'print' : 'main',
+    seatData: persistedState?.seatData?.grid ? persistedState.seatData : null,
+    teacherNotes: normalizeTeacherNotes(persistedState?.teacherNotes),
+  };
+};
+
 function App() {
-  const [classSettings, setClassSettings] = useState({
-    grade: 1,
-    classNumber: 1,
-    studentCount: 24,
-    maleCount: 12,
-    femaleCount: 12,
-    pairingType: 'mixed', // 'mixed', 'male', 'female', 'single'
-    seatArrangement: 'pair' // 'pair', 'single'
-  });
-  const [students, setStudents] = useState([]); // 학생 목록 상태 추가
-  const [currentPage, setCurrentPage] = useState('main'); // 'main', 'print'
-  const [seatData, setSeatData] = useState(null); // 자리 배치 데이터
-  const [teacherNotes, setTeacherNotes] = useState({
-    togetherStudents: [],
-    separateStudents: [],
-    considerationStudents: [],
-  }); // 교사 참고사항 상태 추가
+  const initialAppStateRef = useRef(getInitialAppState());
+  const [classSettings, setClassSettings] = useState(initialAppStateRef.current.classSettings);
+  const [students, setStudents] = useState(initialAppStateRef.current.students);
+  const [currentPage, setCurrentPage] = useState(initialAppStateRef.current.currentPage);
+  const [seatData, setSeatData] = useState(initialAppStateRef.current.seatData);
+  const [teacherNotes, setTeacherNotes] = useState(initialAppStateRef.current.teacherNotes);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    try {
+      window.localStorage.setItem(
+        APP_STORAGE_KEY,
+        JSON.stringify({
+          classSettings,
+          students,
+          currentPage,
+          seatData,
+          teacherNotes,
+        })
+      );
+    } catch (error) {
+      console.error('앱 상태를 저장하지 못했습니다.', error);
+    }
+  }, [classSettings, students, currentPage, seatData, teacherNotes]);
 
   const handleSettingsChange = (newSettings) => {
     if (newSettings.students) {
       setStudents(newSettings.students);
-      // 학생 구성이 바뀌면 기존 배치 데이터와 교사 참고사항 초기화
       setSeatData(null);
-      setTeacherNotes({
-        togetherStudents: [],
-        separateStudents: [],
-        considerationStudents: [],
-      });
-      // students는 classSettings와 별도로 관리
+      setTeacherNotes(DEFAULT_TEACHER_NOTES);
       const { students, ...restSettings } = newSettings;
       setClassSettings(prev => ({ ...prev, ...restSettings }));
     } else {
       setClassSettings(prev => ({ ...prev, ...newSettings }));
-      // 학급 설정이 바뀌어도 기존 배치 데이터 초기화
       setSeatData(null);
     }
   };
@@ -53,17 +105,15 @@ function App() {
   };
 
   const handleViewResults = (isViewOnly = false) => {
-    if (seatData) {
-      if (isViewOnly) {
-        // 배치 다시보기: 즉시 결과 표시 (애니메이션 없음)
-        setSeatData({ ...seatData, skipAnimation: true });
-        setCurrentPage('print');
-      } else {
-        // 재배치하기: 기존 데이터 초기화 후 새로 배치 요청
-        setSeatData(null); // 기존 배치 데이터 초기화
-        // ClassroomLayout에서 새로운 배치 생성을 트리거하기 위해 페이지를 유지
-      }
+    if (!seatData) return;
+
+    if (isViewOnly) {
+      setSeatData({ ...seatData, skipAnimation: true });
+      setCurrentPage('print');
+      return;
     }
+
+    setSeatData(null);
   };
 
   const handleResetArrangement = () => {
@@ -72,8 +122,8 @@ function App() {
 
   if (currentPage === 'print') {
     return (
-      <PrintLayout 
-        settings={classSettings} 
+      <PrintLayout
+        settings={classSettings}
         seatData={seatData}
         onBack={handleBackToMain}
         students={students}
@@ -90,8 +140,8 @@ function App() {
 
       <main className="app-main">
         <ControlPanel settings={classSettings} onSettingsChange={handleSettingsChange} students={students} />
-        <ClassroomLayout 
-          settings={classSettings} 
+        <ClassroomLayout
+          settings={classSettings}
           students={students}
           onRandomArrangement={handleRandomArrangement}
           seatData={seatData}
