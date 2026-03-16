@@ -3,6 +3,9 @@ import * as XLSX from 'xlsx';
 import './ControlPanel.css';
 
 const ControlPanel = ({ settings, onSettingsChange, students }) => {
+  const exampleImageSrc = process.env.PUBLIC_URL
+    ? `${process.env.PUBLIC_URL}/example.png`
+    : '/example.png';
   const fileInputRef = useRef(null);
   const [uploadStatus, setUploadStatus] = useState('');
   const [showExample, setShowExample] = useState(false);
@@ -227,7 +230,7 @@ const ControlPanel = ({ settings, onSettingsChange, students }) => {
             <span className="close-btn" onClick={() => setShowExample(false)}>&times;</span>
             <h4>엑셀 작성 예시</h4>
             <p>첫 행에 컬럼명을 입력하고, 그 아래로 학생 정보를 입력해주세요. (학년, 반, 학번, 성명, 성별)</p>
-            <img src="/jaribaechi/example.png" alt="Excel example" style={{ width: '100%', marginTop: '1rem' }} />
+            <img src={exampleImageSrc} alt="Excel example" style={{ width: '100%', marginTop: '1rem' }} />
           </div>
         </div>
       )}
