@@ -1,323 +1,189 @@
-:root {
-  
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+.print-page-shell {
   min-height: 100vh;
+  background-color: var(--color-ash);
+  color: var(--color-obsidian);
+  display: flex;
+  flex-direction: column;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+.loading-state-card {
+  margin: auto;
+  padding: var(--spacing-32);
+  background-color: var(--color-paper);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-cards);
+  font-size: var(--text-label);
+  color: var(--color-graphite);
 }
 
-.print-layout-final { background: var(--background-color); padding: 2rem 1rem; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+/* Top Bar (No Print) */
+.print-top-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  min-height: 64px;
+  background-color: var(--color-paper);
+  border-bottom: 1px solid var(--color-hairline);
+}
 
-.print-controls-wrapper { width: 100%; max-width: 210mm; margin: 0 auto 2rem auto; background: var(--paper-background); border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); padding: 1rem; }
-.print-controls { display: flex; justify-content: center; gap: 1rem; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem; }
-.display-options { display: flex; justify-content: center; gap: 0.5rem; }
-
-/* 모든 버튼의 기본 텍스트 색상을 어둡게 설정 */
-.back-btn, .print-btn, .save-btn, .option-btn {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
+.print-top-nav-inner {
+  max-width: var(--page-max-width);
+  margin: 0 auto;
+  padding: var(--spacing-12) var(--spacing-24);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  color: #212529; /* 기본 텍스트 색상: 어둡게 */
+  justify-content: space-between;
+  gap: var(--spacing-16);
+  flex-wrap: wrap;
 }
 
-.save-btn:disabled { background-color: #a0a0a0; cursor: not-allowed; }
-
-/* 특정 배경색을 가진 버튼의 텍스트 색상을 흰색으로 오버라이드 */
-.back-btn { background: #6c757d; color: white; }
-.back-btn:hover { background: #5a6268; transform: translateY(-2px); }
-
-.print-btn { background: #0b5ed7; color: white; } /* 기본 색상을 hover 색상으로 변경 */
-.print-btn:hover { background: var(--accent-color); transform: translateY(-2px); } /* hover 색상을 원래 기본 색상으로 변경 */
-
-.save-btn { background: #157347; color: white; } /* 기본 색상을 hover 색상으로 변경 */
-.save-btn:hover { background: var(--save-color); transform: translateY(-2px); } /* hover 색상을 원래 기본 색상으로 변경 */
-
-/* option-btn 기본 스타일 */
-.option-btn { border: 1px solid; }
-.option-btn:hover { background-color: #f8f9fa; border-color: #adb5bd; }
-
-/* 각 옵션 버튼별 색상 */
-.option-btn.name-id-option { background-color: #e3f2fd; border-color: #90caf9; color: #0d47a1; }
-.option-btn.name-id-option.active { background-color: #0d47a1; border-color: #0d47a1; color: white; font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-
-.option-btn.name-only-option { background-color: #e8f5e9; border-color: #a5d6a7; color: #1b5e20; }
-.option-btn.name-only-option.active { background-color: #1b5e20; border-color: #1b5e20; color: white; font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-
-.option-btn.id-only-option { background-color: #fff3e0; border-color: #ffcc80; color: #e65100; }
-.option-btn.id-only-option.active { background-color: #e65100; border-color: #e65100; color: white; font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-
-
-.a4-container-final { 
-  width: 210mm; 
-  height: 297mm; 
-  margin: 0 auto; 
-  background: var(--paper-background); 
-  padding: 15mm 20mm; /* 좌우 여백 늘림 */
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1); 
-  border-radius: 8px; 
-  display: flex; 
-  flex-direction: column; 
-  border: 1px solid #adb5bd; 
+.print-nav-left {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-12);
+  flex-wrap: wrap;
 }
 
-/* 가로(Landscape) 모드 */
-.a4-container-final.landscape { 
-  width: 297mm; 
-  height: 210mm; 
-  padding: 15mm 25mm; /* 가로 모드에서는 좌우 여백을 더 넓게 */
+.nav-divider {
+  color: var(--color-hairline-strong);
+  font-size: var(--text-caption);
 }
 
-.a4-container-final.landscape .print-header-final h1 {
-  font-size: 2.5rem;
+.print-nav-title {
+  font-size: var(--text-label);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-obsidian);
 }
 
-.a4-container-final.landscape .print-date-final {
-  font-size: 1.1rem;
+.print-nav-right {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+  flex-wrap: wrap;
 }
 
-.a4-container-final.landscape .classroom-label-top,
-.a4-container-final.landscape .classroom-label-bottom {
-  font-size: 1.2rem;
-  padding: 0.8rem;
+/* Subbar Options */
+.print-subbar {
+  background-color: var(--color-paper);
+  border-bottom: 1px solid var(--color-hairline);
+  padding: var(--spacing-16) var(--spacing-24);
 }
 
-.print-header-final { text-align: center; padding-bottom: 10mm; border-bottom: 1px solid var(--border-color); flex-shrink: 0; width: 100%; }
-.print-header-final h1 { font-size: 2rem; font-weight: 700; color: var(--primary-text); margin: 0 0 0.5rem 0; }
-.print-date-final { font-size: 0.9rem; color: var(--secondary-text); margin: 0; }
-
-.print-classroom-final { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 0; }
-
-.classroom-label-top, .classroom-label-bottom { text-align: center; font-size: 1rem; font-weight: 700; color: var(--secondary-text); padding: 0.5rem; background-color: #f1f3f5; border-radius: 6px; border: 1px solid var(--border-color); flex-shrink: 0; width: 100%; }
-
-.print-seating-area-final { margin: 20px 0; }
-
-.print-seat-grid-final { 
-  display: flex; 
-  flex-direction: column; 
-  justify-content: center; 
-  align-items: center; 
-  gap: 10px; /* 원래의 행간 간격으로 복원 */
-  max-width: 100%;
-  max-height: 100%;
-  transform-origin: center;
+.print-subbar-inner {
+  max-width: var(--page-max-width);
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-16);
+  flex-wrap: wrap;
 }
 
-/* 세로 모드에서 기본 스케일 (6열 이하) */
-.a4-container-final:not(.landscape) .print-seat-grid-final {
-  --max-cols: 6;
-  --seat-width: 90px; /* 원래 크기 복원 */
-  --seat-gap: 10px; /* 원래 간격 복원 */
-  --max-grid-width: calc(var(--max-cols) * var(--seat-width) + (var(--max-cols) - 1) * var(--seat-gap));
-  --available-width: calc(210mm - 40mm); /* A4 너비에서 패딩 제외 */
-  --scale-factor: min(1, calc(var(--available-width) / var(--max-grid-width)));
-  transform: scale(var(--scale-factor));
+.option-pill-group {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+  flex-wrap: wrap;
 }
 
-/* 세로 모드에서 7열 이상일 때는 자동으로 크기 조정 */
-@media print, screen {
-  .a4-container-final:not(.landscape) .print-seat-grid-final:has(.print-seat-row-final:first-child > :nth-child(13)),
-  .a4-container-final:not(.landscape) .print-seat-grid-final:has(.print-seat-row-final:first-child > :nth-child(11)) {
-    --max-cols: 8;
-    --seat-width: 85px; /* 좌석 너비 감소 */
-    --seat-gap: 8px; /* 간격 감소 */
-    --max-grid-width: calc(var(--max-cols) * var(--seat-width) + (var(--max-cols) - 1) * var(--seat-gap));
-    --scale-factor: min(1, calc(var(--available-width) / var(--max-grid-width)));
-    transform: scale(var(--scale-factor));
-  }
+.print-helper-row {
+  max-width: var(--page-max-width);
+  margin: var(--spacing-12) auto 0;
+  padding-top: var(--spacing-12);
+  border-top: 1px solid var(--color-hairline);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-12);
+  flex-wrap: wrap;
+  font-size: var(--text-caption);
+  color: var(--color-graphite);
 }
 
-/* 가로 모드에서 기본 스케일 (8열 이하) */
-.a4-container-final.landscape .print-seat-grid-final {
-  --max-cols: 8;
-  --seat-width: 90px; /* 원래 크기 복원 */
-  --seat-gap: 10px; /* 원래 간격 복원 */
-  --max-grid-width: calc(var(--max-cols) * var(--seat-width) + (var(--max-cols) - 1) * var(--seat-gap));
-  --available-width: calc(297mm - 50mm); /* A4 가로 너비에서 패딩 제외 */
-  --scale-factor: min(1, calc(var(--available-width) / var(--max-grid-width)));
-  transform: scale(var(--scale-factor));
+.print-warnings-bar {
+  max-width: var(--page-max-width);
+  margin: var(--spacing-12) auto 0;
+  padding: var(--spacing-12) var(--spacing-16);
+  background-color: var(--color-ash);
+  border-left: 2px solid var(--color-obsidian);
+  border-radius: var(--radius-cards);
+  font-size: var(--text-caption);
+  color: var(--color-obsidian);
 }
 
-/* 가로 모드에서 9열 이상일 때는 자동으로 크기 조정 */
-@media print, screen {
-  .a4-container-final.landscape .print-seat-grid-final:has(.print-seat-row-final:first-child > :nth-child(17)),
-  .a4-container-final.landscape .print-seat-grid-final:has(.print-seat-row-final:first-child > :nth-child(15)) {
-    --max-cols: 12;
-    --seat-width: 85px; /* 좌석 너비 감소 */
-    --seat-gap: 8px; /* 간격 감소 */
-    --max-grid-width: calc(var(--max-cols) * var(--seat-width) + (var(--max-cols) - 1) * var(--seat-gap));
-    --scale-factor: min(1, calc(var(--available-width) / var(--max-grid-width)));
-    transform: scale(var(--scale-factor));
-  }
-}
-
-.print-seat-row-final { 
-  display: flex; 
-  justify-content: center; 
-  align-items: center; 
-  gap: 10px; /* 기본 간격은 크게 */
-}
-
-/* 7열 이상인 경우에 간격을 동적으로 조정 */
-@media print, screen {
-  .print-seat-grid-final:has(.print-seat-row-final:first-child > :nth-child(11)) .print-seat-row-final,
-  .print-seat-grid-final:has(.print-seat-row-final:first-child > :nth-child(13)) .print-seat-row-final,
-  .print-seat-grid-final:has(.print-seat-row-final:first-child > :nth-child(15)) .print-seat-row-final,
-  .print-seat-grid-final:has(.print-seat-row-final:first-child > :nth-child(17)) .print-seat-row-final {
-    gap: 8px; /* 많은 열이 있을 때는 간격 줄임 */
-  }
-}
-
-.print-seat-final {
-  width: 90px; /* 기본 크기는 크게 설정 */
-  height: 55px; /* 기본 크기는 크게 설정 */
-  border-radius: 8px;
+/* Countdown Editorial Modal Overlay */
+.shuffle-banner-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background-color: rgba(255, 255, 255, 0.76);
+  backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.15s ease;
-  position: relative;
-  overflow: hidden;
+  padding: var(--spacing-24);
 }
 
-/* 7열 이상인 경우에 좌석 크기를 동적으로 조정 */
-@media print, screen {
-  .print-seat-grid-final:has(.print-seat-row-final:first-child > :nth-child(11)) .print-seat-final,
-  .print-seat-grid-final:has(.print-seat-row-final:first-child > :nth-child(13)) .print-seat-final,
-  .print-seat-grid-final:has(.print-seat-row-final:first-child > :nth-child(15)) .print-seat-final,
-  .print-seat-grid-final:has(.print-seat-row-final:first-child > :nth-child(17)) .print-seat-final {
-    width: 85px; 
-    height: 52px;
-  }
+.shuffle-modal-card {
+  background-color: var(--color-paper);
+  border: 1px solid var(--color-hairline-strong);
+  border-radius: var(--radius-cards);
+  padding: var(--spacing-40);
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-16);
 }
 
-.print-seat-final.hidden { visibility: hidden; }
-
-.print-seat-final.occupied { box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06); }
-
-/* Section-specific colors */
-.print-seat-final[data-section-index="0"] { background: linear-gradient(145deg, #e3f2fd, #bbdefb); border: 1px solid #90caf9; }
-.print-seat-final[data-section-index="0"] .student-name-final { color: #0d47a1; }
-.print-seat-final[data-section-index="0"] .student-id-final { color: #1565c0; }
-
-.print-seat-final[data-section-index="1"] { background: linear-gradient(145deg, #e0f2f1, #b2dfdb); border: 1px solid #80cbc4; }
-.print-seat-final[data-section-index="1"] .student-name-final { color: #004d40; }
-.print-seat-final[data-section-index="1"] .student-id-final { color: #00796b; }
-
-.print-seat-final[data-section-index="2"] { background: linear-gradient(145deg, #fff3e0, #ffe0b2); border: 1px solid #ffcc80; }
-.print-seat-final[data-section-index="2"] .student-name-final { color: #e65100; }
-.print-seat-final[data-section-index="2"] .student-id-final { color: #fb8c00; }
-
-.print-seat-final[data-section-index="3"] { background: linear-gradient(145deg, #f3e5f5, #e1bee7); border: 1px solid #ce93d8; }
-.print-seat-final[data-section-index="3"] .student-name-final { color: #4a148c; }
-.print-seat-final[data-section-index="3"] .student-id-final { color: #8e24aa; }
-
-/* 추가 분단 색상 - 4분단 이상의 자리배치를 위해 추가 */
-.print-seat-final[data-section-index="4"] { background: linear-gradient(145deg, #e8f5e9, #c8e6c9); border: 1px solid #a5d6a7; }
-.print-seat-final[data-section-index="4"] .student-name-final { color: #1b5e20; }
-.print-seat-final[data-section-index="4"] .student-id-final { color: #2e7d32; }
-
-.print-seat-final[data-section-index="5"] { background: linear-gradient(145deg, #f1f8e9, #dcedc8); border: 1px solid #c5e1a5; }
-.print-seat-final[data-section-index="5"] .student-name-final { color: #33691e; }
-.print-seat-final[data-section-index="5"] .student-id-final { color: #558b2f; }
-
-.print-seat-final[data-section-index="6"] { background: linear-gradient(145deg, #fffde7, #fff9c4); border: 1px solid #fff176; }
-.print-seat-final[data-section-index="6"] .student-name-final { color: #f57f17; }
-.print-seat-final[data-section-index="6"] .student-id-final { color: #fbc02d; }
-
-.print-seat-final[data-section-index="7"] { background: linear-gradient(145deg, #fce4ec, #f8bbd0); border: 1px solid #f48fb1; }
-.print-seat-final[data-section-index="7"] .student-name-final { color: #880e4f; }
-.print-seat-final[data-section-index="7"] .student-id-final { color: #c2185b; }
-
-/* 색상이 지정되지 않은 자리를 위한 기본 색상 */
-.print-seat-final { 
-  background: linear-gradient(145deg, #f5f5f5, #e0e0e0); 
-  border: 1px solid #bdbdbd; 
+.shuffle-countdown-digits {
+  font-size: 56px;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-obsidian);
+  font-variant-numeric: tabular-nums;
 }
-.print-seat-final .student-name-final { color: #212121; }
-.print-seat-final .student-id-final { color: #424242; }
 
-.print-student-info-final { padding: 5px; text-align: center; line-height: 1.2; width: 100%; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; }
+.shuffle-desc {
+  font-size: var(--text-label);
+  line-height: 1.55;
+  color: var(--color-graphite);
+  word-break: keep-all;
+}
 
-.student-name-final { font-weight: 700; font-size: 16px; }
-.student-id-final { font-weight: 500; font-size: 12px; }
+/* Sheet Stage & A4 Container */
+.sheet-stage {
+  flex: 1;
+  width: 100%;
+  overflow-x: auto;
+  padding: var(--spacing-32) var(--spacing-24) var(--spacing-64);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
 
-/* 이름 길이 및 표시 유형에 따른 스타일 */
-.display-nameOnly .student-name-final { font-size: 20px; }
-.display-idOnly .student-id-final { font-size: 18px; }
+.a4-sheet {
+  background-color: var(--color-paper);
+  border: 1px solid var(--color-hairline-strong);
+  border-radius: var(--radius-cards);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
 
-.display-nameOnly .student-name-final[style*="0.8em"] { font-size: 16px !important; } /* 4글자 이상 */
+.a4-sheet.portrait {
+  width: 210mm;
+  height: 297mm;
+  padding: 16mm 18mm;
+}
 
-.print-vertical-aisle-final { width: 20px; flex-shrink: 0; }
-
-/* Animations & Overlays */
-.countdown-overlay, .saving-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 1; visibility: visible; transition: opacity 0.3s, visibility 0.3s; }
-.countdown-overlay:not(.show) { opacity: 0; visibility: hidden; }
-.saving-overlay { z-index: 1001; }
-.saving-message { color: white; font-size: 2rem; font-weight: 600; padding: 2rem; background: rgba(0,0,0,0.5); border-radius: 1rem; }
-
-.countdown-number { font-size: 15rem; font-weight: 900; color: white; text-shadow: 0 0 20px rgba(255, 255, 255, 0.5); transform: scale(0.5); opacity: 0; animation: countdown-tick 1s infinite; }
-@keyframes countdown-tick { 0% { transform: scale(0.8); opacity: 0; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
-
-.shuffling .print-seat-final.occupied { border-color: var(--accent-color); box-shadow: inset 0 0 5px rgba(13, 110, 253, 0.3), 0 0 10px rgba(13, 110, 253, 0.2); }
-
-/* Print Styles */
-@media print { 
-  .no-print { display: none !important; } 
-  
-  /* 기본 페이지 설정 */
-  @page { 
-    margin: 0; 
-  } 
-  
-  html, body { 
-    height: 100%; 
-    margin: 0; 
-    padding: 0; 
-    background: white; 
-  } 
-  
-  .print-layout-final { 
-    padding: 0; 
-  } 
-  
-  .a4-container-final { 
-    width: 100%; 
-    height: 100%; 
-    margin: 0; 
-    padding: 15mm !important; 
-    border-radius: 0 !important; 
-    border: none !important; 
-    box-shadow: none !important; 
-  } 
-  
-  .print-header-final { 
-    border-bottom: none !important; 
-  }
-  
-  .classroom-label-top, .classroom-label-bottom {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-    border: 1px solid #dee2e6 !important;
-    background-color: #f8f9fa !important;
-  }
-  
-  /* 인쇄 시 색상 보존 */
-  .print-seat-final {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
+.a4-sheet.landscape {
+  width: 297mm;
+  height: 210mm;
+  padding: 14mm 22mm;
 }
 
 .page-content-wrapper {
@@ -325,33 +191,220 @@ code {
   height: 100%;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+  background-color: var(--color-paper);
 }
 
-.flip-btn {
-  margin-left: 1rem;
-  background-color: #f8f9fa;
-  border-color: #dee2e6;
-  color: #495057;
+.sheet-header {
+  width: 100%;
+  padding-bottom: 6mm;
+  border-bottom: 1px solid var(--color-obsidian);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
 }
 
-.flip-btn:hover {
-  background-color: #e9ecef;
+.sheet-title-block h1 {
+  font-size: 26px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-obsidian);
 }
 
-.landscape-btn {
-  margin-left: 0.5rem;
-  background-color: #f8f9fa;
-  border-color: #dee2e6;
-  color: #495057;
+.sheet-subtitle {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-graphite);
 }
 
-.landscape-btn:hover {
-  background-color: #e9ecef;
+.sheet-body {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6mm 0 2mm;
+  min-height: 0;
 }
 
-.landscape-btn.active {
-  background-color: #6c757d;
-  border-color: #6c757d;
-  color: white;
+.sheet-zone-bar {
+  width: 100%;
+  max-width: 150mm;
+  padding: 6px 16px;
+  border: 1px solid var(--color-hairline-strong);
+  border-radius: var(--radius-cards);
+  background-color: var(--color-ash);
+  text-align: center;
+  font-size: 13px;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-graphite);
 }
 
+.sheet-zone-bar.is-podium {
+  max-width: 72mm;
+  background-color: var(--color-paper);
+  border: 1.5px solid var(--color-obsidian);
+  color: var(--color-obsidian);
+}
+
+.sheet-grid-viewport {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.sheet-seat-grid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  transform-origin: center center;
+}
+
+.sheet-seat-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.sheet-aisle-spacer {
+  width: 20px;
+  flex-shrink: 0;
+}
+
+.sheet-seat-card {
+  width: 92px;
+  height: 56px;
+  border-radius: var(--radius-cards);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: border-color 0.14s ease, background-color 0.14s ease;
+}
+
+.sheet-seat-card.vacant {
+  visibility: hidden;
+}
+
+.sheet-seat-card.occupied {
+  background-color: var(--color-paper);
+  border: 1px solid rgba(0, 0, 0, 0.28);
+  cursor: pointer;
+}
+
+.sheet-seat-card.occupied:hover {
+  border-color: var(--color-obsidian);
+  background-color: var(--color-whisper);
+}
+
+.sheet-seat-card.swap-selected {
+  background-color: var(--color-ash);
+  border: 2px solid var(--color-obsidian);
+}
+
+.sheet-seat-inner {
+  padding: 4px 6px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.sheet-student-id {
+  font-size: 11px;
+  line-height: 1.15;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-graphite);
+  font-variant-numeric: tabular-nums;
+}
+
+.sheet-student-name {
+  font-size: 16px;
+  line-height: 1.2;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-obsidian);
+  letter-spacing: -0.01em;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mode-nameOnly .sheet-student-name,
+.mode-idOnly .sheet-student-name {
+  font-size: 18px;
+}
+
+.sheet-student-name.long-name {
+  font-size: 13.5px;
+}
+
+/* Print Media Rules */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  html,
+  body,
+  .print-page-shell,
+  .sheet-stage {
+    background: #ffffff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100%;
+    height: 100%;
+    overflow: visible !important;
+  }
+
+  .a4-sheet {
+    width: 100% !important;
+    height: 100% !important;
+    border: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    padding: 14mm 16mm !important;
+  }
+
+  .sheet-seat-card.occupied,
+  .sheet-zone-bar {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .sheet-seat-card.swap-selected {
+    background-color: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.28) !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .print-top-nav-inner,
+  .print-subbar {
+    padding-left: var(--spacing-16);
+    padding-right: var(--spacing-16);
+  }
+
+  .sheet-stage {
+    justify-content: flex-start;
+    padding: var(--spacing-16);
+  }
+}

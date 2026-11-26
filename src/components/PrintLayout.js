@@ -1,153 +1,157 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import * as htmlToImage from 'html-to-image';
 import './PrintLayout.css';
+import { getArrangementModeLabel, shuffleArray } from '../utils/seatingAlgorithm';
 
-// 배열을 랜덤하게 섞는 헬퍼 함수
-const shuffleArray = (array) => {
-  if (!array) return [];
-  const newArray = [...array];
-  for (let i = newArray.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-  }
-  return newArray;
-};
+const SHUFFLE_DURATION_MS = 5000;
 
-// 분단 인덱스 계산 함수
-const getSectionIndex = (colIndex, aisles) => {
-  let section = 0;
-  const sortedAisles = [...aisles].sort((a, b) => a - b);
-  for (const aisleIndex of sortedAisles) {
-    if (colIndex > aisleIndex) {
-      section++;
-    }
-  }
-  return section;
-};
+const PrintLayout = ({
+  settings,
+  seatData,
+  onBack,
+  onRearrange,
+  onUpdateSeatData,
+  printOptions,
+  onPrintOptionsChange,
+}) => {
+  const displayType = printOptions?.displayType || 'nameAndId';
+  const isFlipped = Boolean(printOptions?.isFlipped);
+  const isLandscape = Boolean(printOptions?.isLandscape);
 
-const PrintLayout = ({ settings, seatData, onBack }) => {
-  const [isShuffling, setIsShuffling] = useState(true);
+  const [isShuffling, setIsShuffling] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [countdown, setCountdown] = useState(10);
+  const [countdown, setCountdown] = useState(5);
   const [currentGrid, setCurrentGrid] = useState(null);
-  const [displayType, setDisplayType] = useState('nameAndId'); // 'nameAndId', 'nameOnly', 'idOnly'
-  const [isFlipped, setIsFlipped] = useState(false);
-  const [isLandscape, setIsLandscape] = useState(false);
-  
-  // 스케일 계산을 위한 useEffect
-  useEffect(() => {
-    if (!currentGrid || !printAreaRef.current) return;
-    
-    const calculateScale = () => {
-      const maxCols = Math.max(...currentGrid.map(row => row.length));
-      const seatWidth = 85; // CSS의 print-seat-final 너비 (업데이트됨)
-      const seatGap = 8; // CSS의 gap (업데이트됨)
-      const gridWidth = maxCols * seatWidth + (maxCols - 1) * seatGap;
-      
-      // A4 사이즈에서 패딩을 제외한 사용 가능한 너비 (px 단위로 변환)
-      const availableWidth = isLandscape 
-        ? (297 - 50) * 3.7795275591 // 가로 모드: 297mm - 50mm padding (여백 더 넓게)
-        : (210 - 40) * 3.7795275591; // 세로 모드: 210mm - 40mm padding (여백 더 넓게)
-      
-      const scale = Math.min(1, availableWidth / gridWidth);
-      
-      const gridElement = printAreaRef.current.querySelector('.print-seat-grid-final');
-      if (gridElement) {
-        gridElement.style.transform = `scale(${scale})`;
-      }
-    };
-    
-    // DOM이 업데이트된 후 계산
-    const timeoutId = setTimeout(calculateScale, 100);
-    return () => clearTimeout(timeoutId);
-  }, [currentGrid, isLandscape]);
+  const [selectedSwapSeat, setSelectedSwapSeat] = useState(null);
+  const [scaleFactor, setScaleFactor] = useState(1);
 
   const printAreaRef = useRef(null);
   const animationFrameRef = useRef(null);
   const countdownIntervalRef = useRef(null);
 
+  const clearTimers = useCallback(() => {
+    if (animationFrameRef.current) {
+      clearTimeout(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+      countdownIntervalRef.current = null;
+    }
+  }, []);
+
+  // 카운트다운 및 셔플 애니메이션 제어
   useEffect(() => {
+    clearTimers();
+    setSelectedSwapSeat(null);
+
     if (!seatData?.grid) {
-        setCurrentGrid([]);
-        setIsShuffling(false);
-        return;
+      setCurrentGrid([]);
+      setIsShuffling(false);
+      return undefined;
     }
 
-    if (!seatData.students || seatData.students.length === 0) {
+    const studentList = Array.isArray(seatData.students) ? seatData.students : [];
+    if (studentList.length === 0 || seatData.skipAnimation) {
       setIsShuffling(false);
       setCurrentGrid(seatData.grid);
-      return;
+      return undefined;
     }
 
-    // skipAnimation이 true면 애니메이션 없이 즉시 표시
-    if (seatData.skipAnimation) {
-      setIsShuffling(false);
-      setCurrentGrid(seatData.grid);
-      return;
-    }
-
-    const studentList = seatData.students;
-    const duration = 10000;
+    setIsShuffling(true);
+    setCountdown(Math.ceil(SHUFFLE_DURATION_MS / 1000));
     const startTime = Date.now();
 
     const animate = () => {
-      const shuffledStudents = shuffleArray(studentList);
-      const shuffledMaleStudents = shuffledStudents.filter(student => student.gender === 'male');
-      const shuffledFemaleStudents = shuffledStudents.filter(student => student.gender === 'female');
-      let studentIndex = 0;
-      let maleStudentIndex = 0;
-      let femaleStudentIndex = 0;
-      const newGrid = seatData.grid.map(row =>
-        row.map(seat => {
-          if (seat.occupied) {
-            let randomStudent = null;
+      const shuffledAll = shuffleArray(studentList);
+      const shuffledMales = shuffledAll.filter((s) => s.gender === 'male');
+      const shuffledFemales = shuffledAll.filter((s) => s.gender === 'female');
+      let anyIdx = 0;
+      let maleIdx = 0;
+      let femaleIdx = 0;
 
-            if (seat.studentType === 'male' && shuffledMaleStudents.length > 0) {
-              randomStudent = shuffledMaleStudents[maleStudentIndex % shuffledMaleStudents.length];
-              maleStudentIndex++;
-            } else if (seat.studentType === 'female' && shuffledFemaleStudents.length > 0) {
-              randomStudent = shuffledFemaleStudents[femaleStudentIndex % shuffledFemaleStudents.length];
-              femaleStudentIndex++;
-            } else {
-              randomStudent = shuffledStudents[studentIndex % shuffledStudents.length];
-            }
-
-            studentIndex++;
-            return { ...seat, studentName: randomStudent.name, studentId: randomStudent.number };
+      const frameGrid = seatData.grid.map((row) =>
+        row.map((seat) => {
+          if (!seat.occupied) return seat;
+          let picked = null;
+          if (seat.studentType === 'male' && shuffledMales.length > 0) {
+            picked = shuffledMales[maleIdx % shuffledMales.length];
+            maleIdx++;
+          } else if (seat.studentType === 'female' && shuffledFemales.length > 0) {
+            picked = shuffledFemales[femaleIdx % shuffledFemales.length];
+            femaleIdx++;
+          } else {
+            picked = shuffledAll[anyIdx % shuffledAll.length];
           }
-          return seat;
+          anyIdx++;
+          return {
+            ...seat,
+            studentName: picked?.name || seat.studentName,
+            studentId: picked?.number || seat.studentId,
+          };
         })
       );
-      setCurrentGrid(newGrid);
-      animationFrameRef.current = setTimeout(animate, 150);
+
+      setCurrentGrid(frameGrid);
+      animationFrameRef.current = setTimeout(animate, 110);
     };
 
-    setCurrentGrid(seatData.grid);
-    animationFrameRef.current = setTimeout(animate, 150);
+    animate();
 
     countdownIntervalRef.current = setInterval(() => {
-      const elapsedTime = Date.now() - startTime;
-      const remainingTime = Math.max(0, duration - elapsedTime);
-      setCountdown(Math.ceil(remainingTime / 1000));
-      if (remainingTime <= 0) {
-        if (animationFrameRef.current) clearTimeout(animationFrameRef.current);
-        clearInterval(countdownIntervalRef.current);
+      const elapsed = Date.now() - startTime;
+      const remaining = Math.max(0, SHUFFLE_DURATION_MS - elapsed);
+      setCountdown(Math.ceil(remaining / 1000));
+
+      if (remaining <= 0) {
+        clearTimers();
         setIsShuffling(false);
         setCurrentGrid(seatData.grid);
       }
-    }, 1000);
+    }, 200);
 
-    return () => {
-      if (animationFrameRef.current) clearTimeout(animationFrameRef.current);
-      if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
-    };
-  }, [seatData]);
+    return () => clearTimers();
+  }, [seatData, seatData?.arrangedAt, clearTimers]);
+
+  const handleSkipAnimation = () => {
+    clearTimers();
+    setIsShuffling(false);
+    if (seatData?.grid) {
+      setCurrentGrid(seatData.grid);
+    }
+  };
+
+  // 용지 크기에 맞춘 자동 배율 계산 (가로·세로 모두 안전하게 수납)
+  useEffect(() => {
+    if (!currentGrid || currentGrid.length === 0) return;
+
+    const rows = currentGrid.length;
+    const cols = currentGrid[0]?.length || 1;
+    const aisleCount = Array.isArray(seatData?.verticalAisles)
+      ? seatData.verticalAisles.filter((idx) => idx >= 0 && idx < cols - 1).length
+      : 0;
+
+    const seatW = 92;
+    const seatH = 56;
+    const gap = 8;
+    const aisleExtra = 20;
+
+    const naturalWidth = cols * seatW + Math.max(0, cols - 1) * gap + aisleCount * aisleExtra;
+    const naturalHeight = rows * seatH + Math.max(0, rows - 1) * gap;
+
+    const mmToPx = 3.7795275591;
+    const availW = (isLandscape ? 297 - 44 : 210 - 36) * mmToPx;
+    const availH = (isLandscape ? 210 - 95 : 297 - 115) * mmToPx;
+
+    const nextScale = Math.min(1, availW / naturalWidth, availH / naturalHeight);
+    setScaleFactor(Number(nextScale.toFixed(3)));
+  }, [currentGrid, isLandscape, seatData?.verticalAisles]);
 
   const handlePrint = () => {
-    // 가로 모드일 때 인쇄 스타일 동적 추가
+    let dynamicStyle = null;
     if (isLandscape) {
-      const style = document.createElement('style');
-      style.textContent = `
+      dynamicStyle = document.createElement('style');
+      dynamicStyle.textContent = `
         @media print {
           @page {
             size: A4 landscape;
@@ -155,25 +159,28 @@ const PrintLayout = ({ settings, seatData, onBack }) => {
           }
         }
       `;
-      document.head.appendChild(style);
-      
-      // 인쇄 후 스타일 제거
+      document.head.appendChild(dynamicStyle);
+    }
+
+    window.print();
+
+    if (dynamicStyle) {
       setTimeout(() => {
-        document.head.removeChild(style);
+        if (dynamicStyle.parentNode) {
+          dynamicStyle.parentNode.removeChild(dynamicStyle);
+        }
       }, 1000);
     }
-    
-    window.print();
   };
 
   const handleSaveAsImage = useCallback(() => {
     const container = printAreaRef.current;
-    if (container === null) return;
+    if (!container) return;
 
-    // 실제 콘텐츠 영역만 캡처하기 위해 page-content-wrapper를 타겟으로 설정
     const contentWrapper = container.querySelector('.page-content-wrapper');
     if (!contentWrapper) return;
 
+    setSelectedSwapSeat(null);
     setIsSaving(true);
 
     const date = new Date();
@@ -182,161 +189,360 @@ const PrintLayout = ({ settings, seatData, onBack }) => {
     const day = String(date.getDate()).padStart(2, '0');
     const dateString = `${year}${month}${day}`;
     const orientation = isLandscape ? '가로' : '세로';
-    const filename = `${settings.grade}학년 ${settings.classNumber}반 자리배치표(${dateString}_${orientation}).png`;
+    const filename = `${settings.grade}학년_${settings.classNumber}반_자리배치표_${dateString}_${orientation}.png`;
 
-    // A4 비율에 맞게 여백을 추가한 크기 계산
-    const mmToPx = (mm) => (mm / 25.4) * 96; // 96 DPI 기준
-    
-    // 가로/세로 모드에 따른 A4 크기 설정
-    const A4_WIDTH_PX = isLandscape ? Math.round(mmToPx(297)) : Math.round(mmToPx(210)); // 가로: 1123px, 세로: 794px
-    const A4_HEIGHT_PX = isLandscape ? Math.round(mmToPx(210)) : Math.round(mmToPx(297)); // 가로: 794px, 세로: 1123px
-    const MARGIN_PX = Math.round(mmToPx(20)); // 20mm 여백
+    const mmToPx = (mm) => (mm / 25.4) * 96;
+    const A4_WIDTH_PX = isLandscape ? Math.round(mmToPx(297)) : Math.round(mmToPx(210));
+    const A4_HEIGHT_PX = isLandscape ? Math.round(mmToPx(210)) : Math.round(mmToPx(297));
+    const MARGIN_PX = Math.round(mmToPx(18));
 
-    // page-content-wrapper를 A4 크기에 맞게 캡처
-    htmlToImage.toPng(contentWrapper, { 
-      cacheBust: true, 
-      backgroundColor: '#ffffff', 
-      pixelRatio: 2,
-      // A4 크기에 여백을 고려한 크기로 캡처
-      width: A4_WIDTH_PX,
-      height: A4_HEIGHT_PX,
-      style: {
-        padding: `${MARGIN_PX}px`,
-        boxSizing: 'border-box',
-        width: A4_WIDTH_PX + 'px',
-        height: A4_HEIGHT_PX + 'px',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-start',
-        alignItems: 'center'
-      }
-    })
+    htmlToImage
+      .toPng(contentWrapper, {
+        cacheBust: true,
+        backgroundColor: '#ffffff',
+        pixelRatio: 2,
+        width: A4_WIDTH_PX,
+        height: A4_HEIGHT_PX,
+        style: {
+          padding: `${MARGIN_PX}px`,
+          boxSizing: 'border-box',
+          width: `${A4_WIDTH_PX}px`,
+          height: `${A4_HEIGHT_PX}px`,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        },
+      })
       .then((dataUrl) => {
         const link = document.createElement('a');
         link.download = filename;
         link.href = dataUrl;
         link.click();
       })
-      .catch((err) => { console.error('이미지 변환에 실패했습니다.', err); })
+      .catch((err) => {
+        console.error('이미지 변환에 실패했습니다.', err);
+      })
       .finally(() => {
         setIsSaving(false);
       });
-  }, [printAreaRef, settings.grade, settings.classNumber, isLandscape]);
+  }, [settings.grade, settings.classNumber, isLandscape]);
+
+  // 결과 화면에서 좌석 두 개 클릭 시 자리 맞바꾸기 (미세 조정 후 뒤로가기 해도 유지)
+  const handleDeskSwapClick = (displayRowIdx, displayColIdx) => {
+    if (isShuffling || !seatData?.grid || !onUpdateSeatData) return;
+
+    const totalRows = seatData.grid.length;
+    const totalCols = seatData.grid[0]?.length || 0;
+    const origR = isFlipped ? totalRows - 1 - displayRowIdx : displayRowIdx;
+    const origC = isFlipped ? totalCols - 1 - displayColIdx : displayColIdx;
+
+    const clickedSeat = seatData.grid[origR]?.[origC];
+    if (!clickedSeat?.occupied) return;
+
+    if (!selectedSwapSeat) {
+      setSelectedSwapSeat({ r: origR, c: origC });
+      return;
+    }
+
+    if (selectedSwapSeat.r === origR && selectedSwapSeat.c === origC) {
+      setSelectedSwapSeat(null);
+      return;
+    }
+
+    const nextGrid = seatData.grid.map((r) => r.map((cell) => ({ ...cell })));
+    const firstSeat = nextGrid[selectedSwapSeat.r][selectedSwapSeat.c];
+    const secondSeat = nextGrid[origR][origC];
+
+    nextGrid[selectedSwapSeat.r][selectedSwapSeat.c] = {
+      ...firstSeat,
+      studentUid: secondSeat.studentUid,
+      studentName: secondSeat.studentName,
+      studentRawName: secondSeat.studentRawName,
+      studentId: secondSeat.studentId,
+      studentType: secondSeat.studentType,
+    };
+
+    nextGrid[origR][origC] = {
+      ...secondSeat,
+      studentUid: firstSeat.studentUid,
+      studentName: firstSeat.studentName,
+      studentRawName: firstSeat.studentRawName,
+      studentId: firstSeat.studentId,
+      studentType: firstSeat.studentType,
+    };
+
+    setSelectedSwapSeat(null);
+    setCurrentGrid(nextGrid);
+    onUpdateSeatData({
+      ...seatData,
+      grid: nextGrid,
+    });
+  };
 
   if (!currentGrid) {
     return (
-      <div className="print-layout-final">
-        <div className="error-message"><h2>자리 배치 데이터를 준비 중입니다...</h2></div>
+      <div className="print-page-shell">
+        <div className="loading-state-card">
+          <p>자리 배치 데이터를 불러오는 중입니다...</p>
+        </div>
       </div>
     );
   }
 
-  const displayGrid = isFlipped && currentGrid ? [...currentGrid].reverse().map(row => [...row].reverse()) : currentGrid;
+  const totalCols = currentGrid[0]?.length || 0;
+  const totalRows = currentGrid.length;
 
-  const seatingGrid = displayGrid ? (
-    <div className="print-seating-area-final">
-      <div className="print-seat-grid-final">
-        {displayGrid.map((row, rowIndex) => (
-          <div key={rowIndex} className="print-seat-row-final">
-            {row.map((seat, colIndex) => {
-              // 모든 열에 대해 적절한 색상 섹션 적용 (8개 섹션으로 제한)
-              let sectionIndex = getSectionIndex(colIndex, seatData.verticalAisles);
-              sectionIndex = sectionIndex % 8; // 0-7까지의 값으로 제한 (8개의 색상 섹션)
-              
-              const nameStyle = {};
-              let displayName = seat.studentName;
-              const nameClasses = ['student-name-final'];
+  const displayGrid = isFlipped
+    ? [...currentGrid].reverse().map((row) => [...row].reverse())
+    : currentGrid;
 
-              if (displayType === 'nameOnly' && seat.studentName) {
-                if (seat.studentName.length >= 4) {
-                  nameStyle.fontSize = '0.8em';
-                } else if (seat.studentName.length === 2) {
-                  displayName = seat.studentName.split('').join('  ');
-                  nameClasses.push('short-name-2');
-                }
-              }
+  // 상하좌우 180도 반전 시 세로 통로 인덱스도 정확히 좌우 대칭 이동
+  const rawAisles = Array.isArray(seatData?.verticalAisles) ? seatData.verticalAisles : [];
+  const effectiveAisleSet = new Set(
+    isFlipped ? rawAisles.map((idx) => totalCols - 2 - idx) : rawAisles
+  );
 
-              const infoStyle = {};
-              if (displayType === 'nameOnly' && seat.studentName && seat.studentName.length >= 4) {
-                  const horizontalPadding = Math.max(0, 5 - (seat.studentName.length - 3) * 1);
-                  infoStyle['--name-padding-x'] = `${horizontalPadding}px`;
-              }
-
-              return (
-                <React.Fragment key={colIndex}>
-                  {colIndex > 0 && seatData.verticalAisles.includes(colIndex - 1) && (
-                    <div className="print-vertical-aisle-final"></div>
-                  )}
-                  <div 
-                    className={`print-seat-final ${seat.occupied ? 'occupied' : 'hidden'}`}
-                    data-section-index={sectionIndex}
-                  >
-                    {seat.occupied && (
-                      <div className={`print-student-info-final display-${displayType}`}
-                           style={infoStyle}
-                      >
-                        {displayType !== 'idOnly' && <div className={nameClasses.join(' ')} style={nameStyle}>{displayName}</div>}
-                        {displayType !== 'nameOnly' && <div className="student-id-final">{seat.studentId || seat.studentNumber || seat.number}</div>}
-                      </div>
-                    )}
-                  </div>
-                </React.Fragment>
-              );
-            })}
-          </div>
-        ))}
-      </div>
-    </div>
-  ) : null;
+  const updateOption = (key, value) => {
+    if (onPrintOptionsChange) {
+      onPrintOptionsChange({ [key]: value });
+    }
+  };
 
   return (
-    <div className={`print-layout-final ${isShuffling ? 'shuffling' : ''}`}>
-      {isSaving && (
-        <div className="saving-overlay">
-          <div className="saving-message">조금만 기다리시면 다운로드가 시작됩니다.</div>
+    <div className="print-page-shell">
+      {/* 상단 네비게이션 및 액션 바 (인쇄 제외) */}
+      <header className="print-top-nav no-print">
+        <div className="print-top-nav-inner">
+          <div className="print-nav-left">
+            <button type="button" onClick={onBack} className="btn-ghost">
+              ← 설정으로 돌아가기
+            </button>
+            <span className="nav-divider">|</span>
+            <span className="print-nav-title">
+              {settings.grade}학년 {settings.classNumber}반 자리배치표
+            </span>
+          </div>
+
+          <div className="print-nav-right">
+            <button
+              type="button"
+              className="btn-pill"
+              onClick={() => onRearrange && onRearrange(false)}
+              disabled={isSaving}
+            >
+              다시 배치하기
+            </button>
+            <button
+              type="button"
+              className="btn-pill"
+              onClick={handleSaveAsImage}
+              disabled={isSaving || isShuffling}
+            >
+              {isSaving ? '이미지 생성 중...' : '이미지로 저장'}
+            </button>
+            <button
+              type="button"
+              className="btn-filled"
+              onClick={handlePrint}
+              disabled={isShuffling}
+            >
+              출력하기
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* 표시 옵션 컨트롤 바 (인쇄 제외) */}
+      <div className="print-subbar no-print">
+        <div className="print-subbar-inner">
+          <div className="option-pill-group" role="group" aria-label="표시 정보 선택">
+            <button
+              type="button"
+              className={`btn-pill ${displayType === 'nameAndId' ? 'active' : ''}`}
+              onClick={() => updateOption('displayType', 'nameAndId')}
+            >
+              학번 + 이름
+            </button>
+            <button
+              type="button"
+              className={`btn-pill ${displayType === 'nameOnly' ? 'active' : ''}`}
+              onClick={() => updateOption('displayType', 'nameOnly')}
+            >
+              이름만
+            </button>
+            <button
+              type="button"
+              className={`btn-pill ${displayType === 'idOnly' ? 'active' : ''}`}
+              onClick={() => updateOption('displayType', 'idOnly')}
+            >
+              학번만
+            </button>
+          </div>
+
+          <div className="option-pill-group" role="group" aria-label="방향 및 용지 설정">
+            <button
+              type="button"
+              className={`btn-pill ${isFlipped ? 'active' : ''}`}
+              onClick={() => updateOption('isFlipped', !isFlipped)}
+            >
+              {isFlipped ? '교사 시점 (교탁 위)' : '학생 시점 (교탁 아래)'}
+            </button>
+            <button
+              type="button"
+              className={`btn-pill ${isLandscape ? 'active' : ''}`}
+              onClick={() => updateOption('isLandscape', !isLandscape)}
+            >
+              {isLandscape ? 'A4 가로형' : 'A4 세로형'}
+            </button>
+          </div>
+        </div>
+
+        <div className="print-helper-row">
+          <span>
+            {selectedSwapSeat
+              ? '맞바꿀 다른 좌석을 클릭하세요. (취소하려면 같은 좌석을 다시 클릭)'
+              : '배치 완료 후 좌석 두 개를 차례로 클릭하면 두 학생의 자리를 맞바꿀 수 있습니다.'}
+          </span>
+          {onRearrange && !isShuffling && (
+            <button
+              type="button"
+              className="btn-ghost muted"
+              onClick={() => onRearrange(true)}
+            >
+              카운트다운 없이 즉시 재배치
+            </button>
+          )}
+        </div>
+
+        {Array.isArray(seatData?.warnings) && seatData.warnings.length > 0 && (
+          <div className="print-warnings-bar" role="status">
+            {seatData.warnings.map((msg, i) => (
+              <p key={`pw-${i}`}>{msg}</p>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 카운트다운 오버레이 (인쇄 제외) */}
+      {isShuffling && (
+        <div className="shuffle-banner-overlay no-print" role="status" aria-live="polite">
+          <div className="shuffle-modal-card">
+            <p className="section-eyebrow">자리 배치 진행 중</p>
+            <div className="shuffle-countdown-digits">{String(countdown).padStart(2, '0')}</div>
+            <p className="shuffle-desc">
+              설정한 배치 방식과 학생별 고려사항을 반영하여 좌석을 배정하고 있습니다.
+            </p>
+            <button type="button" className="btn-filled" onClick={handleSkipAnimation}>
+              건너뛰고 바로 결과 보기
+            </button>
+          </div>
         </div>
       )}
-      <div className={`countdown-overlay ${isShuffling ? 'show' : ''}`}>
-        <div className="countdown-number">{countdown}</div>
-      </div>
 
-      <div className="print-controls-wrapper no-print">
-        <div className="print-controls">
-            <button onClick={onBack} className="back-btn">← 메인으로 돌아가기</button>
-            <button onClick={handleSaveAsImage} className="save-btn" disabled={isSaving}>🖼️ 이미지로 저장</button>
-            <button onClick={handlePrint} className="print-btn">🖨️ 출력하기</button>
-        </div>
-        <div className="display-options">
-            <button className={`option-btn name-id-option ${displayType === 'nameAndId' ? 'active' : ''}`} onClick={() => setDisplayType('nameAndId')}>학번+이름</button>
-            <button className={`option-btn name-only-option ${displayType === 'nameOnly' ? 'active' : ''}`} onClick={() => setDisplayType('nameOnly')}>이름만</button>
-            <button className={`option-btn id-only-option ${displayType === 'idOnly' ? 'active' : ''}`} onClick={() => setDisplayType('idOnly')}>학번만</button>
-            <button className="option-btn flip-btn" onClick={() => setIsFlipped(!isFlipped)}>🔄 상하 변경</button>
-            <button className={`option-btn landscape-btn ${isLandscape ? 'active' : ''}`} onClick={() => setIsLandscape(!isLandscape)}>📄 가로/세로 보기</button>
-        </div>
-      </div>
+      {/* A4 인쇄 시트 프리뷰 */}
+      <div className="sheet-stage">
+        <div
+          className={`a4-sheet ${isLandscape ? 'landscape' : 'portrait'} ${
+            isShuffling ? 'is-shuffling' : ''
+          }`}
+          ref={printAreaRef}
+        >
+          <div className="page-content-wrapper">
+            <header className="sheet-header">
+              <div className="sheet-title-block">
+                <h1>
+                  {settings.grade}학년 {settings.classNumber}반 자리배치표
+                </h1>
+                <p className="sheet-subtitle">
+                  {new Date(seatData?.arrangedAt || Date.now()).toLocaleDateString('ko-KR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                  {' · '}
+                  {getArrangementModeLabel(seatData?.settings || settings)}
+                </p>
+              </div>
+            </header>
 
-      <div className={`a4-container-final ${isLandscape ? 'landscape' : ''}`} ref={printAreaRef}>
-        <div className="page-content-wrapper">
-          <header className="print-header-final">
-            <h1>{settings.grade}학년 {settings.classNumber}반 자리배치표</h1>
-            <p className="print-date-final">{new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-          </header>
+            <main className="sheet-body">
+              <div className={`sheet-zone-bar ${isFlipped ? 'is-podium' : ''}`}>
+                {isFlipped ? '교탁 (앞쪽)' : '교실 뒤'}
+              </div>
 
-          <main className="print-classroom-final">
-            {isFlipped ? (
-              <>
-                <div className="classroom-label-bottom">교탁</div>
-                {seatingGrid}
-                <div className="classroom-label-top">교실 뒤</div>
-              </>
-            ) : (
-              <>
-                <div className="classroom-label-top">교실 뒤</div>
-                {seatingGrid}
-                <div className="classroom-label-bottom">교탁</div>
-              </>
-            )}
-          </main>
+              <div className="sheet-grid-viewport">
+                <div
+                  className="sheet-seat-grid"
+                  style={{ transform: `scale(${scaleFactor})` }}
+                >
+                  {displayGrid.map((row, rIdx) => (
+                    <div key={`p-row-${rIdx}`} className="sheet-seat-row">
+                      {row.map((seat, cIdx) => {
+                        const origR = isFlipped ? totalRows - 1 - rIdx : rIdx;
+                        const origC = isFlipped ? totalCols - 1 - cIdx : cIdx;
+                        const isSelectedForSwap =
+                          selectedSwapSeat?.r === origR && selectedSwapSeat?.c === origC;
+
+                        const rawId = seat.studentId || '';
+                        const rawName = seat.studentName || '';
+                        const isAutoNumberName = rawName === `${rawId}번`;
+
+                        let primaryText = rawName;
+                        let secondaryText = rawId;
+
+                        if (displayType === 'nameOnly') {
+                          primaryText = rawName;
+                          secondaryText = '';
+                        } else if (displayType === 'idOnly') {
+                          primaryText = rawId;
+                          secondaryText = '';
+                        } else if (isAutoNumberName) {
+                          primaryText = rawName;
+                          secondaryText = '';
+                        }
+
+                        const isLongName = primaryText && primaryText.length >= 4;
+
+                        return (
+                          <React.Fragment key={`p-cell-${rIdx}-${cIdx}`}>
+                            {cIdx > 0 && effectiveAisleSet.has(cIdx - 1) && (
+                              <div className="sheet-aisle-spacer" aria-hidden="true" />
+                            )}
+                            <div
+                              className={`sheet-seat-card ${
+                                seat.occupied ? 'occupied' : 'vacant'
+                              } ${isSelectedForSwap ? 'swap-selected' : ''}`}
+                              onClick={() => seat.occupied && handleDeskSwapClick(rIdx, cIdx)}
+                            >
+                              {seat.occupied && (
+                                <div className={`sheet-seat-inner mode-${displayType}`}>
+                                  {secondaryText && (
+                                    <span className="sheet-student-id">{secondaryText}</span>
+                                  )}
+                                  <span
+                                    className={`sheet-student-name ${
+                                      isLongName ? 'long-name' : ''
+                                    }`}
+                                  >
+                                    {primaryText}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </React.Fragment>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className={`sheet-zone-bar ${!isFlipped ? 'is-podium' : ''}`}>
+                {isFlipped ? '교실 뒤' : '교탁 (앞쪽)'}
+              </div>
+            </main>
+          </div>
         </div>
       </div>
     </div>
